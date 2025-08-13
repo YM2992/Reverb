@@ -12,11 +12,10 @@ BLECharacteristic *pSensorCharacteristic = NULL;
 BLECharacteristic *pLedCharacteristic = NULL;
 bool deviceConnected = false;
 bool oldDeviceConnected = false;
-uint32_t value = 0;
 
 const int ledPin = 2;      // Use the appropriate GPIO pin for your setup
 const int cc1101RxPin = 4; // CC1101 GDO2 pin
-// const int cc1101TxPin = 2; // CC1101 GDO0 pin (if needed for transmission)
+const int cc1101TxPin = 2; // CC1101 GDO0 pin (if needed for transmission)
 
 #define SERVICE_UUID "a78662a0-ec99-41ab-89c1-80669d309a56"
 #define SENSOR_CHARACTERISTIC_UUID "089b232b-0302-4ae1-92e1-2f7ca3be3827"
@@ -24,11 +23,15 @@ const int cc1101RxPin = 4; // CC1101 GDO2 pin
 
 RCSwitch rcSwitch = RCSwitch();
 
+// Create a global instance for CC1101 and RCSwitch management
+CC1101RCSwitchManager cc1101Manager(cc1101RxPin, cc1101TxPin);
+
 // Class to handle CC1101 and RCSwitch initialization and operations
 class CC1101RCSwitchManager
 {
 public:
   CC1101RCSwitchManager(int rxPin) : rxPin(rxPin) {}
+  CC1101RCSwitchManager(int rxPin, int txPin) : rxPin(rxPin), txPin(txPin) {}
 
   void begin()
   {
@@ -97,15 +100,13 @@ public:
     Serial.println(value);
   }
 
+  void setRxPin(int pin) { rxPin = pin; }
   void setTxPin(int pin) { txPin = pin; }
 
 private:
   int rxPin;
   int txPin = -1;
 };
-
-// Create a global instance for CC1101 and RCSwitch management
-CC1101RCSwitchManager cc1101Manager(cc1101RxPin);
 
 class MyServerCallbacks : public BLEServerCallbacks
 {
