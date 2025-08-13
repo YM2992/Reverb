@@ -111,7 +111,7 @@ export default function BleWebApp() {
     };
 
     return (
-        <>
+        <div style={{ padding: '20px', marginBottom: '80px' }}>
             <BleWebAppUI
                 state={state}
                 onConnect={() => manager.connect(setState)}
@@ -128,6 +128,6 @@ export default function BleWebApp() {
                 onConnect={() => manager.connect(setState)}
                 onDisconnect={() => manager.disconnect(setState)}
             />
-        </>
+        </div>
     );
 }
