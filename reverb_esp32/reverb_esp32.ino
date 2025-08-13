@@ -7,58 +7,81 @@
 #include <ELECHOUSE_CC1101_SRC_DRV.h>
 #include <RCSwitch.h>
 
-BLEServer* pServer = NULL;
-BLECharacteristic* pSensorCharacteristic = NULL;
-BLECharacteristic* pLedCharacteristic = NULL;
+BLEServer *pServer = NULL;
+BLECharacteristic *pSensorCharacteristic = NULL;
+BLECharacteristic *pLedCharacteristic = NULL;
 bool deviceConnected = false;
 bool oldDeviceConnected = false;
 uint32_t value = 0;
 
-const int ledPin = 2; // Use the appropriate GPIO pin for your setup
+const int ledPin = 2;      // Use the appropriate GPIO pin for your setup
 const int cc1101RxPin = 4; // CC1101 GDO2 pin
+// const int cc1101TxPin = 2; // CC1101 GDO0 pin (if needed for transmission)
 
-#define SERVICE_UUID        "19b10000-e8f2-537e-4f6c-d104768a1214"
-#define SENSOR_CHARACTERISTIC_UUID "19b10001-e8f2-537e-4f6c-d104768a1214"
-#define LED_CHARACTERISTIC_UUID "19b10002-e8f2-537e-4f6c-d104768a1214"
+#define SERVICE_UUID "a78662a0-ec99-41ab-89c1-80669d309a56"
+#define SENSOR_CHARACTERISTIC_UUID "089b232b-0302-4ae1-92e1-2f7ca3be3827"
+#define LED_CHARACTERISTIC_UUID "63603106-e584-4c3e-90bc-764ae02ceefc"
 
 RCSwitch rcSwitch = RCSwitch();
 
 // Class to handle CC1101 and RCSwitch initialization and operations
-class CC1101RCSwitchManager {
+class CC1101RCSwitchManager
+{
 public:
   CC1101RCSwitchManager(int rxPin) : rxPin(rxPin) {}
 
-  void begin() {
+  void begin()
+  {
     // Set SPI pins: SCK, MISO, MOSI, CSN
     ELECHOUSE_cc1101.setSpiPin(18, 19, 23, 5);
     ELECHOUSE_cc1101.Init();
     ELECHOUSE_cc1101.setMHZ(433.92);
     rcSwitch.enableReceive(rxPin);
     ELECHOUSE_cc1101.SetRx();
-    if (ELECHOUSE_cc1101.getCC1101()) {
+    if (ELECHOUSE_cc1101.getCC1101())
+    {
       Serial.println("CC1101 Connection OK");
-    } else {
+    }
+    else
+    {
       Serial.println("CC1101 Connection Error");
     }
   }
 
-  // Call in loop to check for received signals
-  void checkReceive() {
-    if (rcSwitch.available()) {
+  // Call in loop to check for received signals and send to BLE if available
+  void checkReceiveAndSendBLE(BLECharacteristic *bleChar, bool notify)
+  {
+    if (rcSwitch.available())
+    {
       unsigned long receivedValue = rcSwitch.getReceivedValue();
-      if (receivedValue) {
+      if (receivedValue)
+      {
         Serial.print("Received: ");
         Serial.println(receivedValue);
-      } else {
+
+        if (bleChar != nullptr)
+        {
+          char buf[16];
+          snprintf(buf, sizeof(buf), "%lu", receivedValue);
+          bleChar->setValue(buf);
+          if (notify)
+          {
+            bleChar->notify();
+            Serial.println("Notified BLE client with value: " + String(receivedValue));
+          }
+        }
+      }
+      else
+      {
         Serial.println("Unknown encoding");
       }
       rcSwitch.resetAvailable();
     }
   }
 
-  // Transmit a signal (example usage)
-  void sendSignal(unsigned long value, unsigned int length) {
-    rcSwitch.enableTransmit(txPin); // Set TX pin if needed
+  void sendSignal(unsigned long value, unsigned int length)
+  {
+    rcSwitch.enableTransmit(txPin);
     rcSwitch.send(value, length);
     Serial.print("Sent: ");
     Serial.println(value);
@@ -74,35 +97,44 @@ private:
 // Create a global instance for CC1101 and RCSwitch management
 CC1101RCSwitchManager cc1101Manager(cc1101RxPin);
 
-
-class MyServerCallbacks: public BLEServerCallbacks {
-  void onConnect(BLEServer* pServer) {
+class MyServerCallbacks : public BLEServerCallbacks
+{
+  void onConnect(BLEServer *pServer)
+  {
     deviceConnected = true;
   };
 
-  void onDisconnect(BLEServer* pServer) {
+  void onDisconnect(BLEServer *pServer)
+  {
     deviceConnected = false;
   }
 };
 
-class MyCharacteristicCallbacks : public BLECharacteristicCallbacks {
-  void onWrite(BLECharacteristic* pLedCharacteristic) {
+class MyCharacteristicCallbacks : public BLECharacteristicCallbacks
+{
+  void onWrite(BLECharacteristic *pLedCharacteristic)
+  {
     String value = pLedCharacteristic->getValue();
-    if (value.length() > 0) {
+    if (value.length() > 0)
+    {
       Serial.print("Characteristic event, written: ");
       Serial.println(static_cast<int>(value[0])); // Print the integer value
 
       int receivedValue = static_cast<int>(value[0]);
-      if (receivedValue == 1) {
+      if (receivedValue == 1)
+      {
         digitalWrite(ledPin, HIGH);
-      } else {
+      }
+      else
+      {
         digitalWrite(ledPin, LOW);
       }
     }
   }
 };
 
-void setup() {
+void setup()
+{
   Serial.begin(115200);
   pinMode(ledPin, OUTPUT);
 
@@ -110,7 +142,7 @@ void setup() {
   cc1101Manager.begin();
 
   // Create the BLE Device
-  BLEDevice::init("Reverber");
+  BLEDevice::init("ESP32");
 
   // Create the BLE Server
   pServer = BLEDevice::createServer();
@@ -121,18 +153,16 @@ void setup() {
 
   // Create a BLE Characteristic
   pSensorCharacteristic = pService->createCharacteristic(
-                      SENSOR_CHARACTERISTIC_UUID,
-                      BLECharacteristic::PROPERTY_READ   |
-                      BLECharacteristic::PROPERTY_WRITE  |
-                      BLECharacteristic::PROPERTY_NOTIFY |
-                      BLECharacteristic::PROPERTY_INDICATE
-                    );
+      SENSOR_CHARACTERISTIC_UUID,
+      BLECharacteristic::PROPERTY_READ |
+          BLECharacteristic::PROPERTY_WRITE |
+          BLECharacteristic::PROPERTY_NOTIFY |
+          BLECharacteristic::PROPERTY_INDICATE);
 
   // Create the ON button Characteristic
   pLedCharacteristic = pService->createCharacteristic(
-                      LED_CHARACTERISTIC_UUID,
-                      BLECharacteristic::PROPERTY_WRITE
-                    );
+      LED_CHARACTERISTIC_UUID,
+      BLECharacteristic::PROPERTY_WRITE);
 
   // Register the callback for the ON button characteristic
   pLedCharacteristic->setCallbacks(new MyCharacteristicCallbacks());
@@ -149,33 +179,27 @@ void setup() {
   BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();
   pAdvertising->addServiceUUID(SERVICE_UUID);
   pAdvertising->setScanResponse(false);
-  pAdvertising->setMinPreferred(0x0);  // set value to 0x00 to not advertise this parameter
+  pAdvertising->setMinPreferred(0x0); // set value to 0x00 to not advertise this parameter
   BLEDevice::startAdvertising();
   Serial.println("Waiting for a client...");
 }
 
-void loop() {
-  // notify changed value
-  if (deviceConnected) {
-    pSensorCharacteristic->setValue(String(value).c_str());
-    pSensorCharacteristic->notify();
-    value++;
-    Serial.print("New value notified: ");
-    Serial.println(value);
-    delay(3000); // bluetooth stack will go into congestion, if too many packets are sent, in 6 hours test i was able to go as low as 3ms
-  }
-  // Check for received RF signals
-  cc1101Manager.checkReceive();
+void loop()
+{
+  // Check for received RF signals and send to BLE client if connected
+  cc1101Manager.checkReceiveAndSendBLE(pSensorCharacteristic, deviceConnected);
   // disconnecting
-  if (!deviceConnected && oldDeviceConnected) {
+  if (!deviceConnected && oldDeviceConnected)
+  {
     Serial.println("Device disconnected.");
-    delay(500); // give the bluetooth stack the chance to get things ready
+    delay(500);                  // give the bluetooth stack the chance to get things ready
     pServer->startAdvertising(); // restart advertising
     Serial.println("Start advertising");
     oldDeviceConnected = deviceConnected;
   }
   // connecting
-  if (deviceConnected && !oldDeviceConnected) {
+  if (deviceConnected && !oldDeviceConnected)
+  {
     // do stuff here on connecting
     oldDeviceConnected = deviceConnected;
     Serial.println("Device Connected");
