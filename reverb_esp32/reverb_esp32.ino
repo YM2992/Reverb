@@ -7,7 +7,6 @@
 #include <ELECHOUSE_CC1101_SRC_DRV.h>
 #include <RCSwitch.h>
 
-
 BLEServer* pServer = NULL;
 BLECharacteristic* pSensorCharacteristic = NULL;
 BLECharacteristic* pLedCharacteristic = NULL;
@@ -18,13 +17,63 @@ uint32_t value = 0;
 const int ledPin = 2; // Use the appropriate GPIO pin for your setup
 const int cc1101RxPin = 4; // CC1101 GDO2 pin
 
-RCSwitch rcSwitch = RCSwitch();
-
-// See the following for generating UUIDs:
-// https://www.uuidgenerator.net/
 #define SERVICE_UUID        "19b10000-e8f2-537e-4f6c-d104768a1214"
 #define SENSOR_CHARACTERISTIC_UUID "19b10001-e8f2-537e-4f6c-d104768a1214"
 #define LED_CHARACTERISTIC_UUID "19b10002-e8f2-537e-4f6c-d104768a1214"
+
+RCSwitch rcSwitch = RCSwitch();
+
+// Class to handle CC1101 and RCSwitch initialization and operations
+class CC1101RCSwitchManager {
+public:
+  CC1101RCSwitchManager(int rxPin) : rxPin(rxPin) {}
+
+  void begin() {
+    // Set SPI pins: SCK, MISO, MOSI, CSN
+    ELECHOUSE_cc1101.setSpiPin(18, 19, 23, 5);
+    ELECHOUSE_cc1101.Init();
+    ELECHOUSE_cc1101.setMHZ(433.92);
+    rcSwitch.enableReceive(rxPin);
+    ELECHOUSE_cc1101.SetRx();
+    if (ELECHOUSE_cc1101.getCC1101()) {
+      Serial.println("CC1101 Connection OK");
+    } else {
+      Serial.println("CC1101 Connection Error");
+    }
+  }
+
+  // Call in loop to check for received signals
+  void checkReceive() {
+    if (rcSwitch.available()) {
+      unsigned long receivedValue = rcSwitch.getReceivedValue();
+      if (receivedValue) {
+        Serial.print("Received: ");
+        Serial.println(receivedValue);
+      } else {
+        Serial.println("Unknown encoding");
+      }
+      rcSwitch.resetAvailable();
+    }
+  }
+
+  // Transmit a signal (example usage)
+  void sendSignal(unsigned long value, unsigned int length) {
+    rcSwitch.enableTransmit(txPin); // Set TX pin if needed
+    rcSwitch.send(value, length);
+    Serial.print("Sent: ");
+    Serial.println(value);
+  }
+
+  void setTxPin(int pin) { txPin = pin; }
+
+private:
+  int rxPin;
+  int txPin = -1;
+};
+
+// Create a global instance for CC1101 and RCSwitch management
+CC1101RCSwitchManager cc1101Manager(cc1101RxPin);
+
 
 class MyServerCallbacks: public BLEServerCallbacks {
   void onConnect(BLEServer* pServer) {
@@ -56,6 +105,9 @@ class MyCharacteristicCallbacks : public BLECharacteristicCallbacks {
 void setup() {
   Serial.begin(115200);
   pinMode(ledPin, OUTPUT);
+
+  // Initialize CC1101 and RCSwitch
+  cc1101Manager.begin();
 
   // Create the BLE Device
   BLEDevice::init("Reverber");
@@ -99,7 +151,7 @@ void setup() {
   pAdvertising->setScanResponse(false);
   pAdvertising->setMinPreferred(0x0);  // set value to 0x00 to not advertise this parameter
   BLEDevice::startAdvertising();
-  Serial.println("Waiting a client connection to notify...");
+  Serial.println("Waiting for a client...");
 }
 
 void loop() {
@@ -112,6 +164,8 @@ void loop() {
     Serial.println(value);
     delay(3000); // bluetooth stack will go into congestion, if too many packets are sent, in 6 hours test i was able to go as low as 3ms
   }
+  // Check for received RF signals
+  cc1101Manager.checkReceive();
   // disconnecting
   if (!deviceConnected && oldDeviceConnected) {
     Serial.println("Device disconnected.");
