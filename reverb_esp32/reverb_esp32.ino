@@ -57,17 +57,27 @@ public:
       if (receivedValue)
       {
         Serial.print("Received: ");
-        Serial.println(receivedValue);
+        Serial.print(receivedValue);
+        Serial.print(" (");
+        Serial.print(String(433.92));
+        Serial.print(", ");
+        Serial.print(ELECHOUSE_cc1101.getRssi());
+        Serial.println(")");
 
         if (bleChar != nullptr)
         {
-          char buf[16];
-          snprintf(buf, sizeof(buf), "%lu", receivedValue);
-          bleChar->setValue(buf);
+          // Prepare JSON string with all relevant data
+          char jsonBuf[128];
+          snprintf(jsonBuf, sizeof(jsonBuf),
+                   "{\"data\":%lu,\"freq\":%.2f,\"rssi\":%d}",
+                   receivedValue,
+                   433.92,
+                   ELECHOUSE_cc1101.getRssi());
+          bleChar->setValue(jsonBuf);
           if (notify)
           {
             bleChar->notify();
-            Serial.println("Notified BLE client with value: " + String(receivedValue));
+            Serial.println(String("Notified BLE client with: ") + jsonBuf);
           }
         }
       }
