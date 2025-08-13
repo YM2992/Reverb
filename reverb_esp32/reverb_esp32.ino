@@ -16,12 +16,27 @@ bool deviceConnected = false;
 bool oldDeviceConnected = false;
 
 const int ledPin = 2;      // Use the appropriate GPIO pin for your setup
-const int cc1101RxPin = 4; // CC1101 GDO2 pin
 const int cc1101TxPin = 2; // CC1101 GDO0 pin (if needed for transmission)
+const int cc1101RxPin = 4; // CC1101 GDO2 pin
+
+const int TX_RX_DEBOUNCE = 2000; // Debounce time for TX/RX switching (ms)
 
 #define SERVICE_UUID "a78662a0-ec99-41ab-89c1-80669d309a56"
 #define SENSOR_CHARACTERISTIC_UUID "089b232b-0302-4ae1-92e1-2f7ca3be3827"
 #define LED_CHARACTERISTIC_UUID "63603106-e584-4c3e-90bc-764ae02ceefc"
+#define MODE_CHARACTERISTIC_UUID "b7e1e2a1-7b2a-4e2b-8e2a-7b2a4e2b8e2a"
+
+enum OperationMode
+{
+  MODE_IDLE = 0,
+  MODE_RX = 1,
+  MODE_TX = 2,
+  MODE_OTHER = 3
+};
+OperationMode currentMode = MODE_RX;
+unsigned long lastTxValue = 0;
+unsigned int lastTxBitLength = 24; // Default bit length for TX
+unsigned long lastTxReceivedMillis = 0;
 
 RCSwitch rcSwitch = RCSwitch();
 
@@ -58,6 +73,10 @@ public:
       unsigned long receivedValue = rcSwitch.getReceivedValue();
       if (receivedValue)
       {
+        // Set RX
+        rcSwitch.enableReceive(rxPin);
+        ELECHOUSE_cc1101.SetRx();
+
         Serial.print("Received: ");
         Serial.print(receivedValue);
         Serial.print(" (");
@@ -93,10 +112,26 @@ public:
 
   void sendSignal(unsigned long value, unsigned int length)
   {
+    if (txPin == -1)
+    {
+      Serial.println("TX pin not set, cannot send signal.");
+      return;
+    }
+
+    if (!rcSwitch.available())
+    {
+      Serial.println("RCSwitch not available, cannot send signal.");
+      return;
+    }
+
     rcSwitch.enableTransmit(txPin);
+    ELECHOUSE_cc1101.SetTx();
+
     rcSwitch.send(value, length);
     Serial.print("Sent: ");
     Serial.println(value);
+
+    rcSwitch.resetAvailable();
   }
 
   void setRxPin(int pin) { rxPin = pin; }
@@ -122,22 +157,43 @@ class MyServerCallbacks : public BLEServerCallbacks
 
 class MyCharacteristicCallbacks : public BLECharacteristicCallbacks
 {
-  void onWrite(BLECharacteristic *pLedCharacteristic)
+  void onWrite(BLECharacteristic *pChar)
   {
-    String value = pLedCharacteristic->getValue();
-    if (value.length() > 0)
+    String value = pChar->getValue();
+    if (pChar->getUUID().toString() == LED_CHARACTERISTIC_UUID)
     {
-      if (value.length() >= 4)
+      if (value.length() > 0)
       {
-        // Use .c_str() to get the raw pointer from the String before casting
-        uint32_t reassembledValue = *reinterpret_cast<const uint32_t *>(value.c_str());
-
-        Serial.print("Received 32-bit value: ");
-        Serial.println(reassembledValue);
+        // Accept both stringified numbers and raw bytes
+        unsigned long txValue = 0;
+        if (value.length() >= 4)
+        {
+          txValue = *reinterpret_cast<const uint32_t *>(value.c_str());
+        }
+        else
+        {
+          txValue = value.toInt();
+        }
+        lastTxValue = txValue;
+        lastTxBitLength = 24; // You may want to set this dynamically
+        Serial.print("Received TX value: ");
+        Serial.println(lastTxValue);
+        // Switch to TX mode and record time
+        currentMode = MODE_TX;
+        lastTxReceivedMillis = millis();
       }
-      else
+    }
+    else if (pChar->getUUID().toString() == MODE_CHARACTERISTIC_UUID)
+    {
+      if (value.length() > 0)
       {
-        Serial.println("Error: Received less than 4 bytes!");
+        int mode = value.toInt();
+        if (mode >= 0 && mode <= 2)
+        {
+          currentMode = static_cast<OperationMode>(mode);
+          Serial.print("Mode set to: ");
+          Serial.println(currentMode == MODE_RX ? "RX" : (currentMode == MODE_TX ? "TX" : "OTHER"));
+        }
       }
     }
   }
@@ -177,13 +233,21 @@ void setup()
       LED_CHARACTERISTIC_UUID,
       BLECharacteristic::PROPERTY_WRITE);
 
-  // Register the callback for the ON button characteristic
+  // Create the mode characteristic
+  BLECharacteristic *pModeCharacteristic = pService->createCharacteristic(
+      MODE_CHARACTERISTIC_UUID,
+      BLECharacteristic::PROPERTY_READ |
+          BLECharacteristic::PROPERTY_WRITE);
+
+  // Register the callback for the characteristics
   pLedCharacteristic->setCallbacks(new MyCharacteristicCallbacks());
+  pModeCharacteristic->setCallbacks(new MyCharacteristicCallbacks());
 
   // https://www.bluetooth.com/specifications/gatt/viewer?attributeXmlFile=org.bluetooth.descriptor.gatt.client_characteristic_configuration.xml
   // Create a BLE Descriptor
   pSensorCharacteristic->addDescriptor(new BLE2902());
   pLedCharacteristic->addDescriptor(new BLE2902());
+  pModeCharacteristic->addDescriptor(new BLE2902());
 
   // Start the service
   pService->start();
@@ -199,8 +263,35 @@ void setup()
 
 void loop()
 {
-  // Check for received RF signals and send to BLE client if connected
-  cc1101Manager.checkReceiveAndSendBLE(pSensorCharacteristic, deviceConnected);
+  unsigned long now = millis();
+
+  // If in TX mode, check for timeout
+  if (currentMode == MODE_TX)
+  {
+    // TX mode: transmit the last value received from BLE
+    if (lastTxValue != 0)
+    {
+      cc1101Manager.sendSignal(lastTxValue, lastTxBitLength);
+      delay(500);      // avoid spamming TX, adjust as needed
+      lastTxValue = 0; // Only send once per value
+    }
+    // If no new TX value for 2s, switch back to RX
+    if (now - lastTxReceivedMillis > TX_RX_DEBOUNCE)
+    {
+      currentMode = MODE_RX;
+      Serial.println("TX timeout, switching back to RX mode");
+    }
+  }
+  else if (currentMode == MODE_RX)
+  {
+    // RX mode: receive from CC1101 and send to BLE
+    cc1101Manager.checkReceiveAndSendBLE(pSensorCharacteristic, deviceConnected);
+  }
+  else
+  {
+    // Other mode: do nothing or add custom logic
+  }
+
   // disconnecting
   if (!deviceConnected && oldDeviceConnected)
   {
