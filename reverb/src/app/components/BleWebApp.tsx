@@ -115,6 +115,30 @@ const BleWebApp: React.FC = () => {
         alert(`Replaying ${selectedSignals.length} signal(s):\n` + selectedSignals.map(s => `${s.frequency} MHz, ${s.data}, RSSI: ${s.rssi}`).join('\n'));
     };
 
+    // Clear signals handler
+    const handleClearSignals = () => {
+        if (window.confirm("Clear all detected signals?")) {
+            SignalStorage.clearSignals();
+            setSignals([]);
+        }
+    };
+
+    // Export signals handler
+    const handleExportSignals = () => {
+        const dataStr = JSON.stringify(signals, null, 2);
+        const blob = new Blob([dataStr], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `reverb_signals_${new Date().toISOString().replace(/[:.]/g, '-')}.json`;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => {
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }, 100);
+    };
+
     return (
         <div style={{ padding: '20px', marginBottom: '80px' }}>
             <BleWebAppUI
@@ -124,6 +148,10 @@ const BleWebApp: React.FC = () => {
                 onWrite={(val) => manager.writeOnCharacteristic(val, setState)}
             />
             <SignalList signals={signals} />
+            <div style={{ display: 'flex', gap: 12, margin: '8px 0 0 0', justifyContent: 'flex-end' }}>
+                <button onClick={handleExportSignals} style={{ padding: '6px 18px', borderRadius: 6, border: 'none', background: '#007cf0', color: '#fff', fontWeight: 600, cursor: 'pointer' }}>Export</button>
+                <button onClick={handleClearSignals} style={{ padding: '6px 18px', borderRadius: 6, border: 'none', background: '#f0004c', color: '#fff', fontWeight: 600, cursor: 'pointer' }}>Clear</button>
+            </div>
             <SignalReplay signals={signals} onReplay={handleReplay} />
             <FooterBar
                 state={state}
