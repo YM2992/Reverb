@@ -12,14 +12,18 @@ interface SignalListProps {
   signals: Signal[];
 }
 
+const tableContainerStyle: React.CSSProperties = {
+  maxHeight: 320,
+  overflowY: 'auto',
+  margin: '16px 0',
+  borderRadius: 8,
+  background: '#181818',
+};
 const tableStyle: React.CSSProperties = {
   width: '100%',
   borderCollapse: 'collapse',
-  margin: '16px 0',
-  background: '#181818',
+  background: 'transparent',
   color: '#fff',
-  borderRadius: 8,
-  overflow: 'hidden',
 };
 
 const thStyle: React.CSSProperties = {
@@ -28,6 +32,9 @@ const thStyle: React.CSSProperties = {
   textAlign: 'left',
   fontWeight: 700,
   borderBottom: '2px solid #333',
+  position: 'sticky',
+  top: 0,
+  zIndex: 2,
 };
 
 const tdStyle: React.CSSProperties = {
@@ -39,33 +46,40 @@ const tdStyle: React.CSSProperties = {
 export default function SignalList({ signals }: SignalListProps) {
   return (
     <div style={{ maxWidth: 800, margin: '0 auto' }}>
-      <h2>Detected Signals</h2>
-      <table style={tableStyle}>
-        <thead>
-          <tr>
-            <th style={thStyle}>Freq. (MHz)</th>
-            <th style={thStyle}>Data</th>
-            <th style={thStyle}>RSSI (dBm)</th>
-          </tr>
-        </thead>
-        <tbody>
-          {signals.length === 0 ? (
+      <h2 style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <span>Detected Signals</span>
+        <span style={{ fontSize: '0.95em', color: '#aaa', fontWeight: 400 }}>
+          Total: {signals.length}
+        </span>
+      </h2>
+      <div style={tableContainerStyle}>
+        <table style={tableStyle}>
+          <thead>
             <tr>
-              <td colSpan={3} style={{ ...tdStyle, textAlign: 'center', color: '#aaa' }}>
-                No signals detected.
-              </td>
+              <th style={thStyle}>Frequency (MHz)</th>
+              <th style={thStyle}>Data</th>
+              <th style={thStyle}>RSSI (dBm)</th>
             </tr>
-          ) : (
-            signals.map((signal) => (
-              <tr key={signal.id}>
-                <td style={tdStyle}>{signal.frequency}</td>
-                <td style={tdStyle}>{signal.data}</td>
-                <td style={tdStyle}>{signal.rssi}</td>
+          </thead>
+          <tbody>
+            {signals.length === 0 ? (
+              <tr>
+                <td colSpan={3} style={{ ...tdStyle, textAlign: 'center', color: '#aaa' }}>
+                  No signals detected.
+                </td>
               </tr>
-            ))
-          )}
-        </tbody>
-      </table>
+            ) : (
+              signals.map((signal) => (
+                <tr key={signal.id}>
+                  <td style={tdStyle}>{signal.frequency}</td>
+                  <td style={tdStyle}>{signal.data}</td>
+                  <td style={tdStyle}>{signal.rssi}</td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
