@@ -43,7 +43,7 @@ export default function SignalList({ signals }: SignalListProps) {
       <table style={tableStyle}>
         <thead>
           <tr>
-            <th style={thStyle}>Frequency (MHz)</th>
+            <th style={thStyle}>Freq. (MHz)</th>
             <th style={thStyle}>Data</th>
             <th style={thStyle}>RSSI (dBm)</th>
           </tr>
