@@ -44,18 +44,7 @@ function BleWebAppUI({
     };
     return (
         <div style={{ maxWidth: 600, margin: "0 auto", fontFamily: "sans-serif" }}>
-            <h1>ESP32 Web BLE Application</h1>
-            <p>
-                BLE state: <strong><span style={{ color: state.bleStateColor }}>{state.bleState}</span></strong>
-            </p>
-            <h2>Fetched Value</h2>
-            <p>{state.lastValueReceived}</p>
-            <h2>Control GPIO 2</h2>
-            <div style={{ marginBottom: 16 }}>
-                <button style={buttonOn} onClick={() => onWrite(1)}>ON</button>
-                <button style={buttonOff} onClick={() => onWrite(0)}>OFF</button>
-            </div>
-            <p>Last value sent: <span>{state.lastValueSent}</span></p>
+            <h1>Reverb</h1>
         </div>
     );
 }

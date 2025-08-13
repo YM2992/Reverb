@@ -55,11 +55,13 @@ const FooterBar: React.FC<FooterBarProps> = ({
         >
             <div style={{ display: 'flex', flexDirection: 'column', color: state.bleStateColor }}>
                 <span>
-                    {isConnected
-                        ? `Connected to ${deviceName ?? 'Unknown'}`
-                        : (state.bleState.includes('Disconnected'))
-                            ? 'Disconnected'
-                            : (state.bleState.includes('Error connecting')) ? `${state.bleState} ${deviceName}` : `${state.bleState}`}
+                    <strong>
+                        {isConnected
+                            ? `Connected to ${deviceName ?? 'Unknown'}`
+                            : (state.bleState.includes('Disconnected'))
+                                ? 'Disconnected'
+                                : (state.bleState.includes('Error connecting')) ? `${state.bleState} ${deviceName}` : `${state.bleState}`}
+                    </strong>
                 </span>
                 <span style={{ color: '#fff', fontSize: '0.95em', marginTop: 2 }}>
                     {(isConnected && lastMessageTimestamp !== -1) ?
