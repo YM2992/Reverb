@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { SignalStorage } from "./SignalStorage";
 import { BluetoothManager, BluetoothState } from "./BluetoothManager";
 import FooterBar from "./FooterBar";
 import SignalList, { Signal } from "./SignalList";
@@ -49,7 +50,7 @@ function BleWebAppUI({
     );
 }
 
-export default function BleWebApp() {
+const BleWebApp: React.FC = () => {
     const [state, setState] = useState<BluetoothState>({
         deviceName: "-",
         bleState: "Disconnected",
@@ -61,7 +62,8 @@ export default function BleWebApp() {
     });
     const [manager] = useState(() => new BluetoothManager());
 
-    const [signals, setSignals] = useState<Signal[]>([]);
+    // Load signals from localStorage on mount
+    const [signals, setSignals] = useState<Signal[]>(() => SignalStorage.loadSignals());
 
     // Update signals when new BLE data is received
     useEffect(() => {
@@ -80,18 +82,18 @@ export default function BleWebApp() {
         setSignals(prevSignals => {
             // Find by exact data and frequency
             const idx = prevSignals.findIndex(s => s.data === String(data) && s.frequency === Number(frequency));
+            let updated;
             if (idx !== -1) {
                 // Update RSSI and timestamp
-                const updated = [...prevSignals];
+                updated = [...prevSignals];
                 updated[idx] = {
                     ...updated[idx],
                     rssi: rssi,
                     timestamp: Date.now(),
                 };
-                return updated;
             } else {
                 // Add new row
-                return [
+                updated = [
                     ...prevSignals,
                     {
                         id: Math.random().toString(36).slice(2),
@@ -102,6 +104,9 @@ export default function BleWebApp() {
                     }
                 ];
             }
+            // Save to localStorage
+            SignalStorage.saveSignals(updated);
+            return updated;
         });
     }, [state.lastValueReceived]);
 
@@ -130,4 +135,6 @@ export default function BleWebApp() {
             />
         </div>
     );
-}
+};
+
+export default BleWebApp;
