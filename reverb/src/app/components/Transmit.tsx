@@ -67,38 +67,45 @@ const Transmit: React.FC<TransmitProps> = ({ onTransmit, onStart, onStop, value:
             />
             <button
                 onClick={handleTransmit}
+                disabled={value.trim() === ""}
                 style={{
                     flex: "1 1 110px",
                     minWidth: 0,
                     padding: "10px 0",
                     borderRadius: 6,
                     border: "none",
-                    background: "linear-gradient(90deg, #007cf0 0%, #00dfd8 100%)",
+                    background: value.trim() === "" ? "#b0b0b0" : "linear-gradient(90deg, #007cf0 0%, #00dfd8 100%)",
                     color: "#fff",
                     fontWeight: 600,
                     fontSize: "1rem",
+                    opacity: value.trim() === "" ? 0.7 : 1,
+                    cursor: value.trim() === "" ? "not-allowed" : "pointer",
                 }}
             >
                 Transmit Once
             </button>
             <button
                 onClick={handleClear}
+                disabled={value.trim() === ""}
                 style={{
                     flex: "0 1 55px",
                     minWidth: 0,
                     padding: "10px 0",
                     borderRadius: 6,
                     border: "none",
-                    background: "#888",
+                    background: value.trim() === "" ? "#b0b0b0" : "#888",
                     color: "#fff",
                     fontWeight: 600,
                     fontSize: "1rem",
+                    opacity: value.trim() === "" ? 0.7 : 1,
+                    cursor: value.trim() === "" ? "not-allowed" : "pointer",
                 }}
             >
                 Clear
             </button>
             <button
                 onClick={handleStartStop}
+                disabled={!isTransmitting && value.trim() === ""}
                 style={{
                     flex: "0 1 160px",
                     minWidth: 0,
@@ -107,10 +114,12 @@ const Transmit: React.FC<TransmitProps> = ({ onTransmit, onStart, onStop, value:
                     border: "none",
                     background: isTransmitting
                         ? "linear-gradient(90deg, #f0004c 0%, #ff7a18 100%)"
-                        : "linear-gradient(90deg, #24af37 0%, #24af37 100%)",
+                        : value.trim() === "" ? "#b0b0b0" : "linear-gradient(90deg, #24af37 0%, #24af37 100%)",
                     color: "#fff",
                     fontWeight: 600,
                     fontSize: "1rem",
+                    opacity: !isTransmitting && value.trim() === "" ? 0.7 : 1,
+                    cursor: !isTransmitting && value.trim() === "" ? "not-allowed" : "pointer",
                 }}
             >
                 {isTransmitting ? "Stop Transmitting" : "Start Transmitting"}
