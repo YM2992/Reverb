@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 export interface Signal {
   id: string;
@@ -66,6 +66,14 @@ const tdDate: React.CSSProperties = {
 export default function SignalList({ signals }: SignalListProps) {
   // Sort signals by timestamp descending (newest first)
   const sortedSignals = [...signals].sort((a, b) => b.timestamp - a.timestamp);
+
+  // Current time state
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    const interval = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <div style={{ maxWidth: 800, margin: '0 auto' }}>
       <h2 style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -74,6 +82,11 @@ export default function SignalList({ signals }: SignalListProps) {
           Total: {signals.length}
         </span>
       </h2>
+      <div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center', marginBottom: 4 }}>
+        <span style={{ color: '#b5e0ff', fontFamily: 'monospace', fontSize: '1.05em', letterSpacing: 0.5 }}>
+          {now.toLocaleString()}
+        </span>
+      </div>
       <div style={tableContainerStyle}>
         <table style={tableStyle}>
           <thead>
