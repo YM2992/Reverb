@@ -10,6 +10,7 @@ export interface Signal {
 
 interface SignalListProps {
   signals: Signal[];
+  onRowClick?: (signal: Signal) => void;
 }
 
 const tableContainerStyle: React.CSSProperties = {
@@ -63,7 +64,7 @@ const tdDate: React.CSSProperties = {
   whiteSpace: 'nowrap',
 };
 
-export default function SignalList({ signals }: SignalListProps) {
+export default function SignalList({ signals, onRowClick }: SignalListProps) {
   // Sort signals by timestamp descending (newest first)
   const sortedSignals = [...signals].sort((a, b) => b.timestamp - a.timestamp);
 
@@ -106,7 +107,13 @@ export default function SignalList({ signals }: SignalListProps) {
               </tr>
             ) : (
               sortedSignals.map((signal) => (
-                <tr key={signal.id}>
+                <tr
+                  key={signal.id}
+                  style={onRowClick ? { cursor: 'pointer', background: '#232323' } : {}}
+                  onClick={onRowClick ? () => onRowClick(signal) : undefined}
+                  onMouseOver={onRowClick ? (e) => { (e.currentTarget as HTMLTableRowElement).style.background = '#333'; } : undefined}
+                  onMouseOut={onRowClick ? (e) => { (e.currentTarget as HTMLTableRowElement).style.background = '#232323'; } : undefined}
+                >
                   <td style={tdDate}>{new Date(signal.timestamp).toLocaleString()}</td>
                   <td style={tdNarrow}>{signal.frequency}</td>
                   <td style={tdStyle}>{signal.data}</td>

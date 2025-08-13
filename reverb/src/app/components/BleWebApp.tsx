@@ -3,9 +3,11 @@
 import React, { useState, useEffect } from "react";
 import { SignalStorage } from "./SignalStorage";
 import { BluetoothManager, BluetoothState } from "./BluetoothManager";
+
 import FooterBar from "./FooterBar";
 import SignalList, { Signal } from "./SignalList";
 import SignalReplay from "./SignalReplay";
+import Transmit from "./Transmit";
 
 function BleWebAppUI({
     state,
@@ -139,6 +141,49 @@ const BleWebApp: React.FC = () => {
         }, 100);
     };
 
+    // Transmit logic
+    const transmitInterval = React.useRef<NodeJS.Timeout | null>(null);
+    const [transmitValue, setTransmitValue] = useState("");
+
+    const handleTransmitOnce = (value: string) => {
+        const num = Number(value);
+        if (!isNaN(num)) {
+            manager.writeOnCharacteristic(num, setState);
+        } else {
+            window.alert("Please enter a valid number to transmit.");
+        }
+    };
+
+    const handleStartTransmit = (value: string) => {
+        if (transmitInterval.current) return;
+        const num = Number(value);
+        if (isNaN(num)) {
+            window.alert("Please enter a valid number to transmit.");
+            return;
+        }
+        transmitInterval.current = setInterval(() => {
+            manager.writeOnCharacteristic(num, setState);
+        }, 1000);
+    };
+
+    const handleStopTransmit = () => {
+        if (transmitInterval.current) {
+            clearInterval(transmitInterval.current);
+            transmitInterval.current = null;
+        }
+    };
+
+    React.useEffect(() => {
+        return () => {
+            if (transmitInterval.current) clearInterval(transmitInterval.current);
+        };
+    }, []);
+
+    // Handler for clicking a signal row to auto-fill transmit value
+    const handleSignalRowClick = (signal: Signal) => {
+        setTransmitValue(signal.data);
+    };
+
     return (
         <div style={{ padding: '20px', marginBottom: '80px' }}>
             <BleWebAppUI
@@ -147,11 +192,18 @@ const BleWebApp: React.FC = () => {
                 onDisconnect={() => manager.disconnect(setState)}
                 onWrite={(val) => manager.writeOnCharacteristic(val, setState)}
             />
-            <SignalList signals={signals} />
+            <SignalList signals={signals} onRowClick={handleSignalRowClick} />
             <div style={{ display: 'flex', gap: 12, margin: '8px 0 0 0', justifyContent: 'flex-end' }}>
                 <button onClick={handleExportSignals} style={{ padding: '6px 18px', borderRadius: 6, border: 'none', background: '#007cf0', color: '#fff', fontWeight: 600, cursor: 'pointer' }}>Export</button>
                 <button onClick={handleClearSignals} style={{ padding: '6px 18px', borderRadius: 6, border: 'none', background: '#f0004c', color: '#fff', fontWeight: 600, cursor: 'pointer' }}>Clear</button>
             </div>
+            <Transmit
+                onTransmit={handleTransmitOnce}
+                onStart={handleStartTransmit}
+                onStop={handleStopTransmit}
+                value={transmitValue}
+                setValue={setTransmitValue}
+            />
             <SignalReplay signals={signals} onReplay={handleReplay} />
             <FooterBar
                 state={state}
