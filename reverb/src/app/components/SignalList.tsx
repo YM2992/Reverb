@@ -37,10 +37,30 @@ const thStyle: React.CSSProperties = {
   zIndex: 2,
 };
 
+const thNarrow: React.CSSProperties = {
+  ...thStyle,
+  width: 90,
+  minWidth: 70,
+  maxWidth: 110,
+};
 const tdStyle: React.CSSProperties = {
   padding: '8px 12px',
   borderBottom: '1px solid #333',
   fontFamily: 'monospace',
+};
+const tdNarrow: React.CSSProperties = {
+  ...tdStyle,
+  width: 90,
+  minWidth: 70,
+  maxWidth: 110,
+  textAlign: 'right',
+};
+const tdDate: React.CSSProperties = {
+  ...tdStyle,
+  fontFamily: 'monospace',
+  color: '#b5e0ff',
+  fontSize: '0.98em',
+  whiteSpace: 'nowrap',
 };
 
 export default function SignalList({ signals }: SignalListProps) {
@@ -56,24 +76,26 @@ export default function SignalList({ signals }: SignalListProps) {
         <table style={tableStyle}>
           <thead>
             <tr>
-              <th style={thStyle}>Frequency (MHz)</th>
+              <th style={thStyle}>Timestamp</th>
+              <th style={thNarrow}>Frequency (MHz)</th>
               <th style={thStyle}>Data</th>
-              <th style={thStyle}>RSSI (dBm)</th>
+              <th style={thNarrow}>RSSI (dBm)</th>
             </tr>
           </thead>
           <tbody>
             {signals.length === 0 ? (
               <tr>
-                <td colSpan={3} style={{ ...tdStyle, textAlign: 'center', color: '#aaa' }}>
+                <td colSpan={4} style={{ ...tdStyle, textAlign: 'center', color: '#aaa' }}>
                   No signals detected.
                 </td>
               </tr>
             ) : (
               signals.map((signal) => (
                 <tr key={signal.id}>
-                  <td style={tdStyle}>{signal.frequency}</td>
+                  <td style={tdDate}>{new Date(signal.timestamp).toLocaleString()}</td>
+                  <td style={tdNarrow}>{signal.frequency}</td>
                   <td style={tdStyle}>{signal.data}</td>
-                  <td style={tdStyle}>{signal.rssi}</td>
+                  <td style={tdNarrow}>{signal.rssi}</td>
                 </tr>
               ))
             )}
