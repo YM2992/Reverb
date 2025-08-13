@@ -100,8 +100,9 @@ export class BluetoothManager {
         if (server && server.connected) {
             try {
                 if (!service || typeof service.getCharacteristic !== 'function') throw new Error("BLE service not found");
-                const characteristic = await service.getCharacteristic(this.ledCharacteristic) as { writeValue?: (data: Uint8Array) => Promise<void> };
-                const data = new Uint8Array([val]);
+                const characteristic = await service.getCharacteristic(this.ledCharacteristic) as { writeValue?: (data: Uint32Array) => Promise<void> };
+                const data = new Uint32Array([val]);
+                console.log(`Writing data ${data} value ${val} to LED characteristic`);
                 if (characteristic.writeValue) await characteristic.writeValue(data);
                 this.setState({ lastValueSent: val.toString() });
                 onStateChange(this.state);
