@@ -23,8 +23,6 @@ const int cc1101TxPin = 2; // CC1101 GDO0 pin (if needed for transmission)
 
 RCSwitch rcSwitch = RCSwitch();
 
-// Create a global instance for CC1101 and RCSwitch management
-CC1101RCSwitchManager cc1101Manager(cc1101RxPin, cc1101TxPin);
 
 // Class to handle CC1101 and RCSwitch initialization and operations
 class CC1101RCSwitchManager
@@ -143,6 +141,9 @@ class MyCharacteristicCallbacks : public BLECharacteristicCallbacks
     }
   }
 };
+
+// Create a global instance for CC1101 and RCSwitch management
+CC1101RCSwitchManager cc1101Manager(cc1101RxPin, cc1101TxPin);
 
 void setup()
 {
