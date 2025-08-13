@@ -64,6 +64,8 @@ const tdDate: React.CSSProperties = {
 };
 
 export default function SignalList({ signals }: SignalListProps) {
+  // Sort signals by timestamp descending (newest first)
+  const sortedSignals = [...signals].sort((a, b) => b.timestamp - a.timestamp);
   return (
     <div style={{ maxWidth: 800, margin: '0 auto' }}>
       <h2 style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -83,14 +85,14 @@ export default function SignalList({ signals }: SignalListProps) {
             </tr>
           </thead>
           <tbody>
-            {signals.length === 0 ? (
+            {sortedSignals.length === 0 ? (
               <tr>
                 <td colSpan={4} style={{ ...tdStyle, textAlign: 'center', color: '#aaa' }}>
                   No signals detected.
                 </td>
               </tr>
             ) : (
-              signals.map((signal) => (
+              sortedSignals.map((signal) => (
                 <tr key={signal.id}>
                   <td style={tdDate}>{new Date(signal.timestamp).toLocaleString()}</td>
                   <td style={tdNarrow}>{signal.frequency}</td>
