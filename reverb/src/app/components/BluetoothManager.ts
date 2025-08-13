@@ -12,10 +12,10 @@ export type BluetoothState = {
 };
 
 export class BluetoothManager {
-    private deviceName = "ESP32";
-    private bleService = "19b10000-e8f2-537e-4f6c-d104768a1214";
-    private ledCharacteristic = "19b10002-e8f2-537e-4f6c-d104768a1214";
-    private sensorCharacteristic = "19b10001-e8f2-537e-4f6c-d104768a1214";
+    private deviceName = "Reverber";
+    private bleService = "a78662a0-ec99-41ab-89c1-80669d309a56";
+    private sensorCharacteristic = "089b232b-0302-4ae1-92e1-2f7ca3be3827";
+    private ledCharacteristic = "63603106-e584-4c3e-90bc-764ae02ceefc";
 
     private bleServer: unknown = null;
     private bleServiceFound: unknown = null;
