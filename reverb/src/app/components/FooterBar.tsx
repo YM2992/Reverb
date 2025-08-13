@@ -68,7 +68,15 @@ const FooterBar: React.FC<FooterBarProps> = ({
                 </span>
             </div>
             <button
-                onClick={isConnected ? onDisconnect : onConnect}
+                onClick={() => {
+                    if (isConnected) {
+                        if (window.confirm('Are you sure you want to disconnect?')) {
+                            onDisconnect();
+                        }
+                    } else {
+                        onConnect();
+                    }
+                }}
                 aria-label={isConnected ? 'Disconnect' : 'Connect'}
                 style={{
                     padding: '0.5rem 1.2rem',
