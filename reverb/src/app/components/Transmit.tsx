@@ -6,9 +6,10 @@ interface TransmitProps {
     onStop: () => void;
     value?: string;
     setValue?: (v: string) => void;
+    bleConnected?: boolean;
 }
 
-const Transmit: React.FC<TransmitProps> = ({ onTransmit, onStart, onStop, value: propValue, setValue: propSetValue }) => {
+const Transmit: React.FC<TransmitProps> = ({ onTransmit, onStart, onStop, value: propValue, setValue: propSetValue, bleConnected = true }) => {
     const [internalValue, setInternalValue] = useState("");
     const value = propValue !== undefined ? propValue : internalValue;
     const setValue = propSetValue !== undefined ? propSetValue : setInternalValue;
@@ -16,7 +17,7 @@ const Transmit: React.FC<TransmitProps> = ({ onTransmit, onStart, onStop, value:
     const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
     const handleTransmit = () => {
-        if (value.trim() !== "") {
+        if (value.trim() !== "" && bleConnected) {
             onTransmit(value);
         }
     };
@@ -30,7 +31,7 @@ const Transmit: React.FC<TransmitProps> = ({ onTransmit, onStart, onStop, value:
             setIsTransmitting(false);
             if (intervalRef.current) clearInterval(intervalRef.current);
             onStop();
-        } else {
+        } else if (bleConnected && value.trim() !== "") {
             setIsTransmitting(true);
             onStart(value);
             intervalRef.current = setInterval(() => {
@@ -38,6 +39,16 @@ const Transmit: React.FC<TransmitProps> = ({ onTransmit, onStart, onStop, value:
             }, 1000);
         }
     };
+
+    // Stop transmitting if BLE disconnects
+    React.useEffect(() => {
+        if (!bleConnected && isTransmitting) {
+            setIsTransmitting(false);
+            if (intervalRef.current) clearInterval(intervalRef.current);
+            onStop();
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [bleConnected]);
 
     return (
         <div
@@ -67,14 +78,14 @@ const Transmit: React.FC<TransmitProps> = ({ onTransmit, onStart, onStop, value:
             />
             <button
                 onClick={handleTransmit}
-                disabled={value.trim() === ""}
+                disabled={value.trim() === "" || !bleConnected}
                 style={{
                     flex: "1 1 110px",
                     minWidth: 0,
                     padding: "10px 0",
                     borderRadius: 6,
                     border: "none",
-                    background: value.trim() === "" ? "#b0b0b0" : "linear-gradient(90deg, #007cf0 0%, #00dfd8 100%)",
+                    background: (value.trim() === "" || !bleConnected) ? "#b0b0b0" : "linear-gradient(90deg, #007cf0 0%, #00dfd8 100%)",
                     color: "#fff",
                     fontWeight: 600,
                     fontSize: "1rem",
@@ -86,14 +97,14 @@ const Transmit: React.FC<TransmitProps> = ({ onTransmit, onStart, onStop, value:
             </button>
             <button
                 onClick={handleClear}
-                disabled={value.trim() === ""}
+                disabled={value.trim() === "" || !bleConnected}
                 style={{
                     flex: "0 1 55px",
                     minWidth: 0,
                     padding: "10px 0",
                     borderRadius: 6,
                     border: "none",
-                    background: value.trim() === "" ? "#b0b0b0" : "#888",
+                    background: (value.trim() === "" || !bleConnected) ? "#b0b0b0" : "#888",
                     color: "#fff",
                     fontWeight: 600,
                     fontSize: "1rem",
@@ -105,7 +116,7 @@ const Transmit: React.FC<TransmitProps> = ({ onTransmit, onStart, onStop, value:
             </button>
             <button
                 onClick={handleStartStop}
-                disabled={!isTransmitting && value.trim() === ""}
+                disabled={(!isTransmitting && (value.trim() === "" || !bleConnected))}
                 style={{
                     flex: "0 1 160px",
                     minWidth: 0,
@@ -114,7 +125,7 @@ const Transmit: React.FC<TransmitProps> = ({ onTransmit, onStart, onStop, value:
                     border: "none",
                     background: isTransmitting
                         ? "linear-gradient(90deg, #f0004c 0%, #ff7a18 100%)"
-                        : value.trim() === "" ? "#b0b0b0" : "linear-gradient(90deg, #24af37 0%, #24af37 100%)",
+                        : (value.trim() === "" || !bleConnected) ? "#b0b0b0" : "linear-gradient(90deg, #24af37 0%, #24af37 100%)",
                     color: "#fff",
                     fontWeight: 600,
                     fontSize: "1rem",

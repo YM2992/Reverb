@@ -203,6 +203,7 @@ const BleWebApp: React.FC = () => {
                 onStop={handleStopTransmit}
                 value={transmitValue}
                 setValue={setTransmitValue}
+                bleConnected={state.bleState.includes("Connected")}
             />
             <SignalReplay signals={signals} onReplay={handleReplay} />
             <FooterBar
