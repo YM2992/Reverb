@@ -7,6 +7,8 @@
 #include <ELECHOUSE_CC1101_SRC_DRV.h>
 #include <RCSwitch.h>
 
+#include <cstdint> // Required for uint32_t
+
 BLEServer *pServer = NULL;
 BLECharacteristic *pSensorCharacteristic = NULL;
 BLECharacteristic *pLedCharacteristic = NULL;
@@ -22,7 +24,6 @@ const int cc1101TxPin = 2; // CC1101 GDO0 pin (if needed for transmission)
 #define LED_CHARACTERISTIC_UUID "63603106-e584-4c3e-90bc-764ae02ceefc"
 
 RCSwitch rcSwitch = RCSwitch();
-
 
 // Class to handle CC1101 and RCSwitch initialization and operations
 class CC1101RCSwitchManager
@@ -126,17 +127,17 @@ class MyCharacteristicCallbacks : public BLECharacteristicCallbacks
     String value = pLedCharacteristic->getValue();
     if (value.length() > 0)
     {
-      Serial.print("Characteristic event, written: ");
-      Serial.println(static_cast<int>(value[0])); // Print the integer value
-
-      int receivedValue = static_cast<int>(value[0]);
-      if (receivedValue == 1)
+      if (value.length() >= 4)
       {
-        digitalWrite(ledPin, HIGH);
+        // Use .c_str() to get the raw pointer from the String before casting
+        uint32_t reassembledValue = *reinterpret_cast<const uint32_t *>(value.c_str());
+
+        Serial.print("Received 32-bit value: ");
+        Serial.println(reassembledValue);
       }
       else
       {
-        digitalWrite(ledPin, LOW);
+        Serial.println("Error: Received less than 4 bytes!");
       }
     }
   }
