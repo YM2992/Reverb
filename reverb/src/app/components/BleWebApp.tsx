@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { BluetoothManager, BluetoothState } from "./BluetoothManager";
 import FooterBar from "./FooterBar";
 import SignalList, { Signal } from "./SignalList";
@@ -72,23 +72,49 @@ export default function BleWebApp() {
     });
     const [manager] = useState(() => new BluetoothManager());
 
-    // Mock signals for demonstration; replace with real BLE/CC1101 data as needed
-    const [signals, setSignals] = useState<Signal[]>([
-        {
-            id: '1',
-            frequency: 433.92,
-            data: '0xA1B2C3',
-            rssi: -45,
-            timestamp: Date.now() - 60000,
-        },
-        {
-            id: '2',
-            frequency: 868.3,
-            data: '0xD4E5F6',
-            rssi: -52,
-            timestamp: Date.now() - 30000,
-        },
-    ]);
+    const [signals, setSignals] = useState<Signal[]>([]);
+
+    // Update signals when new BLE data is received
+    useEffect(() => {
+        if (!state.lastValueReceived || state.lastValueReceived === '-') return;
+        let parsed: any;
+        try {
+            parsed = JSON.parse(state.lastValueReceived);
+        } catch {
+            return;
+        }
+        // Accept both {data, freq, rssi} and {value, freq, rssi, protocol}
+        const data = parsed.data !== undefined ? parsed.data : (parsed.value !== undefined ? parsed.value : undefined);
+        const frequency = parsed.freq || parsed.frequency;
+        const rssi = parsed.rssi;
+        if (data === undefined || frequency === undefined || rssi === undefined) return;
+        setSignals(prevSignals => {
+            // Find by exact data and frequency
+            const idx = prevSignals.findIndex(s => s.data === String(data) && s.frequency === Number(frequency));
+            if (idx !== -1) {
+                // Update RSSI and timestamp
+                const updated = [...prevSignals];
+                updated[idx] = {
+                    ...updated[idx],
+                    rssi: rssi,
+                    timestamp: Date.now(),
+                };
+                return updated;
+            } else {
+                // Add new row
+                return [
+                    ...prevSignals,
+                    {
+                        id: Math.random().toString(36).slice(2),
+                        frequency: Number(frequency),
+                        data: String(data),
+                        rssi: rssi,
+                        timestamp: Date.now(),
+                    }
+                ];
+            }
+        });
+    }, [state.lastValueReceived]);
 
     // Handler for replaying signals (replace with real logic as needed)
     const handleReplay = (selectedSignals: Signal[]) => {
