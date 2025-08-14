@@ -20,15 +20,7 @@ export default function SignalReplay({ signals, onReplay }: SignalReplayProps) {
 
   return (
     <div
-      style={{
-        maxWidth: 480,
-        width: '100%',
-        margin: '24px auto 0',
-        background: '#181818',
-        padding: '16px 8px',
-        borderRadius: 8,
-        boxSizing: 'border-box',
-      }}
+      className="mx-auto max-w-lg w-full mt-6 bg-neutral-900 p-4 rounded-lg box-border"
     >
       <h2 style={{ fontSize: '1.2rem', marginBottom: 12 }}>Replay Signals</h2>
       <div

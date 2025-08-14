@@ -48,7 +48,7 @@ function BleWebAppUI({
         background: 'linear-gradient(90deg, #d13a30 0%, #ff1818ff 100%)',
     };
     return (
-        <div style={{ maxWidth: 600, margin: "0 auto", fontFamily: "sans-serif", marginBottom: 24 }}>
+        <div className="mx-auto max-w-2xl font-sans mb-6 px-4 w-full">
             <h1
                 style={{
                     letterSpacing: 2,
@@ -248,13 +248,7 @@ const BleWebApp: React.FC = () => {
 
     return (
         <div
-            style={{
-                padding: '20px',
-                marginBottom: '80px',
-                position: 'relative',
-                marginTop: bleDisconnected ? 60 : undefined,
-                transition: 'margin-top 0.2s',
-            }}
+            className={`mx-auto max-w-3xl w-full relative mb-20 px-4 ${bleDisconnected ? 'mt-16' : ''} transition-all`}
         >
             <DisconnectedBanner show={bleDisconnected} />
             <BleWebAppUI

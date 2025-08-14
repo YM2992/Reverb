@@ -69,7 +69,7 @@ const Transmit: React.FC<TransmitProps> = ({ onTransmit, onStart, onStop, value:
     }, []);
 
     return (
-        <div style={{ width: "100%", maxWidth: 600, margin: "12px 0" }}>
+        <div className="mx-auto w-full max-w-2xl my-3">
             {/* Value row */}
             <div style={{ display: "flex", gap: 16, alignItems: "flex-end", marginBottom: 8 }}>
                 <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column" }}>

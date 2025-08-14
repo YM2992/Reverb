@@ -76,7 +76,7 @@ export default function SignalList({ signals, onRowClick }: SignalListProps) {
   }, []);
 
   return (
-    <div style={{ maxWidth: 800, margin: '0 auto' }}>
+    <div className="mx-auto max-w-4xl w-full">
       <h2 style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <span>Detected Signals</span>
         <span style={{ fontSize: '0.95em', color: '#aaa', fontWeight: 400 }}>
