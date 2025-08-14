@@ -58,7 +58,6 @@ export class BluetoothManager {
      * Returns true if the BLE device is actually connected at the GATT level.
      */
     public isActuallyConnected(): boolean {
-        // @ts-expect-error: Web Bluetooth API
         return !!(this.device && this.device.gatt && this.device.gatt.connected);
     }
 
@@ -72,15 +71,14 @@ export class BluetoothManager {
         try {
             const nav = navigator as Navigator & { bluetooth?: unknown };
             if (!nav.bluetooth || typeof nav.bluetooth !== "object") throw new Error("Bluetooth not available");
-            // @ts-expect-error: Web Bluetooth API is not in TS lib yet
             const device = await nav.bluetooth.requestDevice({
                 filters: [{ services: [this.bleService] }]
             });
             this.device = device;
-            this.device = device;
             this.setState({ bleState: `Connected to device ${device.name}`, bleStateColor: "#24af37", deviceName: device.name, connectionEstablishedTimestamp: Date.now() });
             onStateChange(this.state);
             device.addEventListener("gattservicedisconnected", () => this.onDisconnected(onStateChange));
+            if (!device.gatt) throw new Error("No GATT server found on device");
             const gattServer = await device.gatt.connect();
             this.bleServer = gattServer;
             const service = await gattServer.getPrimaryService(this.bleService);
