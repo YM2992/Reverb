@@ -1,6 +1,4 @@
-<p align="left">
-   <img src="reverb/public/reverb_icon.png" alt="Reverb Icon" width="90" style="vertical-align:middle; margin-right: 12px;" />
-</p>
+![Reverb Icon](reverb/public/reverb_icon.png){ width=90 }
 
 # Reverb
 
@@ -10,17 +8,19 @@ from a web interface.
 
 ## Features
 
+- **Web Interface**: Use the app directly from your mobile browser.
+
 - **BLE Connection**: Connect/disconnect to your ESP32 device via BLE.
 
-- **Record Signals**: View detected/received signals with columns for Frequency, Data, and RSSI.
+- **Record Signals**: View received signals with Frequency, Data, and RSSI.
 
-- **Transmit Signals**: Send custom RF signals from the web interface.
+- **Transmit Signals**: Send custom RF signals via the web interface.
 
-- **Replay Signals**: Select a time range and replay signals within that range.
+- **Replay Signals**: Replay signals from a selected time range.
 
 ### Coming Soon
 
-- **Wardriving**: Map and analyse RF signals in your area.
+- **[Wardriving](https://en.wikipedia.org/wiki/Wardriving)**: Map and analyse RF signals in your area.
 
 - **Signal Map**: Visualise recorded signals on a map.
 
@@ -49,14 +49,14 @@ This project requires the following hardware components:
 
 3. ***(Optional)*** Add the app to your device's home screen for easy access (see [PWA Installation](#pwa-installation) below)
 
-4. Press the **connect** button
-![Main page - disconnected](/assets/quickstart/Step1.png)
+4. Press the **connect** button  
+![Main page - disconnected](/assets/quickstart/Step1.png){ width=200 }
 
-5. Follow the pairing process
-![Pairing process](/assets/quickstart/Step2.png)
+5. Follow the pairing process  
+![Pairing process](/assets/quickstart/Step2.png){ width=200 }
 
-6. Enjoy!
-![Main page - connected](/assets/quickstart/Step3.jpg)
+6. Enjoy!  
+![Main page - connected](/assets/quickstart/Step3.jpg){ width=200 }
 
 ## Getting Started
 
