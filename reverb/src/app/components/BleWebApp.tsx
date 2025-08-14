@@ -201,45 +201,52 @@ const BleWebApp: React.FC = () => {
     }, [manager]);
 
     return (
-        <div
-            className={`mx-auto max-w-3xl w-full relative mb-20 px-4 ${bleDisconnected ? 'mt-16' : ''} transition-all`}
-        >
+        <div className="relative">
             <DisconnectedBanner show={bleDisconnected} />
-            <BleWebAppUI
-                state={state}
-                onConnect={() => manager.connect(setState)}
-                onDisconnect={() => manager.disconnect(setState)}
-                onWrite={(val) => manager.writeOnCharacteristic(val, setState)}
-            />
-            <SignalList signals={signals} onRowClick={handleSignalRowClick} />
-            <div className="flex gap-3 mt-2 justify-end">
-                <button onClick={() => setShowHistory(true)} className="px-4 py-1.5 rounded-md border-none bg-neutral-800 text-white font-semibold cursor-pointer">View History</button>
-                <button onClick={handleExportSignals} className="px-4 py-1.5 rounded-md border-none bg-blue-500 text-white font-semibold cursor-pointer">Export</button>
-                <button onClick={handleClearSignals} className="px-4 py-1.5 rounded-md border-none bg-pink-600 text-white font-semibold cursor-pointer">Clear</button>
+            {bleDisconnected && (
+                <div className="h-14 w-full" aria-hidden="true"></div>
+            )}
+            <div
+                className={
+                    "mx-auto max-w-3xl w-full mb-20 px-4 transition-all"
+                }
+            >
+                <BleWebAppUI
+                    state={state}
+                    onConnect={() => manager.connect(setState)}
+                    onDisconnect={() => manager.disconnect(setState)}
+                    onWrite={(val) => manager.writeOnCharacteristic(val, setState)}
+                />
+                <SignalList signals={signals} onRowClick={handleSignalRowClick} />
+                <div className="flex gap-3 mt-2 justify-end">
+                    <button onClick={() => setShowHistory(true)} className="px-4 py-1.5 rounded-md border-none bg-neutral-800 text-white font-semibold cursor-pointer">View History</button>
+                    <button onClick={handleExportSignals} className="px-4 py-1.5 rounded-md border-none bg-blue-500 text-white font-semibold cursor-pointer">Export</button>
+                    <button onClick={handleClearSignals} className="px-4 py-1.5 rounded-md border-none bg-pink-600 text-white font-semibold cursor-pointer">Clear</button>
+                </div>
+                <SignalHistoryModal
+                    isOpen={showHistory}
+                    onClose={() => setShowHistory(false)}
+                    history={history}
+                    onClear={handleClearHistory}
+                />
+                <Transmit
+                    onTransmit={handleTransmitOnce}
+                    onStart={handleStartTransmit}
+                    onStop={handleStopTransmit}
+                    value={transmitValue}
+                    setValue={setTransmitValue}
+                    bleConnected={state.bleState.includes("Connected")}
+                />
+                <SignalReplay signals={signals} onReplay={handleReplay} />
+                <FooterBar
+                    state={state}
+                    isConnected={!bleDisconnected}
+                    deviceName={state.deviceName}
+                    lastMessageTimestamp={state.lastReceivedTimestamp}
+                    onConnect={() => manager.connect(setState)}
+                    onDisconnect={() => manager.disconnect(setState)}
+                />
             </div>
-            <SignalHistoryModal
-                isOpen={showHistory}
-                onClose={() => setShowHistory(false)}
-                history={history}
-                onClear={handleClearHistory}
-            />
-            <Transmit
-                onTransmit={handleTransmitOnce}
-                onStart={handleStartTransmit}
-                onStop={handleStopTransmit}
-                value={transmitValue}
-                setValue={setTransmitValue}
-                bleConnected={state.bleState.includes("Connected")}
-            />
-            <SignalReplay signals={signals} onReplay={handleReplay} />
-            <FooterBar
-                state={state}
-                isConnected={!bleDisconnected}
-                deviceName={state.deviceName}
-                lastMessageTimestamp={state.lastReceivedTimestamp}
-                onConnect={() => manager.connect(setState)}
-                onDisconnect={() => manager.disconnect(setState)}
-            />
         </div>
     );
 };
