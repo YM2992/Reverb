@@ -125,14 +125,14 @@ const Transmit: React.FC<TransmitProps> = ({ onTransmit, onStart, onStop, value:
                 <button
                     onClick={handleClear}
                     disabled={value.trim() === "" || !bleConnected}
-                    className={`flex-none min-w-0 py-2 rounded-md border-none text-white font-semibold text-base ${value.trim() === "" || !bleConnected ? 'bg-gray-400 cursor-not-allowed opacity-70' : 'bg-gray-600 cursor-pointer'}`}
+                    className={`flex-1 min-w-0 py-2 rounded-md border-none text-white font-semibold text-base ${value.trim() === "" || !bleConnected ? 'bg-gray-400 cursor-not-allowed opacity-70' : 'bg-gray-600 cursor-pointer'}`}
                 >
                     Clear
                 </button>
                 <button
                     onClick={handleStartStop}
                     disabled={(!isTransmitting && (value.trim() === "" || !bleConnected))}
-                    className={`flex-none min-w-0 py-2 rounded-md border-none text-white font-semibold text-base ${isTransmitting ? 'bg-gradient-to-r from-pink-600 to-orange-400 cursor-pointer' : (value.trim() === "" || !bleConnected) ? 'bg-gray-400 cursor-not-allowed opacity-70' : 'bg-green-600 cursor-pointer'}`}
+                    className={`flex-1 min-w-0 py-2 rounded-md border-none text-white font-semibold text-base ${isTransmitting ? 'bg-gradient-to-r from-pink-600 to-orange-400 cursor-pointer' : (value.trim() === "" || !bleConnected) ? 'bg-gray-400 cursor-not-allowed opacity-70' : 'bg-green-600 cursor-pointer'}`}
                 >
                     {isTransmitting ? "Stop Transmitting" : "Start Transmitting"}
                 </button>
