@@ -47,8 +47,44 @@ function BleWebAppUI({
         background: 'linear-gradient(90deg, #d13a30 0%, #ff1818ff 100%)',
     };
     return (
-        <div style={{ maxWidth: 600, margin: "0 auto", fontFamily: "sans-serif" }}>
-            <h1>Reverb</h1>
+        <div style={{ maxWidth: 600, margin: "0 auto", fontFamily: "sans-serif", marginBottom: 24 }}>
+            <h1
+                style={{
+                    letterSpacing: 2,
+                    textAlign: 'center',
+                    margin: '24px 0 18px 0',
+                    color: '#fff',
+                    userSelect: 'none',
+                    fontWeight: 900,
+                    fontSize: '2.7rem',
+                    lineHeight: 1.1,
+                    position: 'relative',
+                }}
+            >
+                Reverb
+                <span
+                    style={{
+                        display: 'block',
+                        width: '100%',
+                        height: 10,
+                        marginTop: 6,
+                        background: 'none',
+                        position: 'relative',
+                    }}
+                >
+                    <svg width="120" height="10" viewBox="0 0 120 10" style={{ display: 'block', margin: '0 auto' }}>
+                        <polyline
+                            points="0,5 10,5 15,2 20,8 25,5 35,5 40,3 45,7 50,5 60,5 65,2 70,8 75,5 85,5 90,3 95,7 100,5 110,5 120,5"
+                            fill="none"
+                            stroke="#4fd1ff"
+                            strokeWidth="2"
+                            opacity="0.5"
+                        >
+                            <animate attributeName="opacity" values="0.5;1;0.5" dur="2s" repeatCount="indefinite" />
+                        </polyline>
+                    </svg>
+                </span>
+            </h1>
         </div>
     );
 }
