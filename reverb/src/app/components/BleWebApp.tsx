@@ -22,58 +22,12 @@ function BleWebAppUI({
     onDisconnect: () => void;
     onWrite: (val: number) => void;
 }) {
-    const buttonStyle: React.CSSProperties = {
-        padding: '10px 20px',
-        margin: '0 8px 12px 0',
-        border: 'none',
-        borderRadius: '6px',
-        background: 'linear-gradient(90deg, #007cf0 0%, #00dfd8 100%)',
-        color: '#fff',
-        fontWeight: 600,
-        fontSize: '1rem',
-        cursor: 'pointer',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-        transition: 'background 0.2s, transform 0.1s',
-    };
-    const buttonDanger: React.CSSProperties = {
-        ...buttonStyle,
-        background: 'linear-gradient(90deg, #f0004c 0%, #ff7a18 100%)',
-    };
-    const buttonOn: React.CSSProperties = {
-        ...buttonStyle,
-        background: 'linear-gradient(90deg, #24af37 0%, #24af37 100%)',
-    };
-    const buttonOff: React.CSSProperties = {
-        ...buttonStyle,
-        background: 'linear-gradient(90deg, #d13a30 0%, #ff1818ff 100%)',
-    };
     return (
         <div className="mx-auto max-w-2xl font-sans mb-6 px-4 w-full">
-            <h1
-                style={{
-                    letterSpacing: 2,
-                    textAlign: 'center',
-                    margin: '24px 0 18px 0',
-                    color: '#fff',
-                    userSelect: 'none',
-                    fontWeight: 900,
-                    fontSize: '2.7rem',
-                    lineHeight: 1.1,
-                    position: 'relative',
-                }}
-            >
+            <h1 className="text-center mt-6 mb-4 text-white select-none font-black text-4xl leading-tight tracking-wide relative">
                 Reverb
-                <span
-                    style={{
-                        display: 'block',
-                        width: '100%',
-                        height: 10,
-                        marginTop: 6,
-                        background: 'none',
-                        position: 'relative',
-                    }}
-                >
-                    <svg width="120" height="10" viewBox="0 0 120 10" style={{ display: 'block', margin: '0 auto' }}>
+                <span className="block w-full h-2 mt-1 bg-none relative">
+                    <svg width="120" height="10" viewBox="0 0 120 10" className="block mx-auto">
                         <polyline
                             points="0,5 10,5 15,2 20,8 25,5 35,5 40,3 45,7 50,5 60,5 65,2 70,8 75,5 85,5 90,3 95,7 100,5 110,5 120,5"
                             fill="none"
@@ -258,10 +212,10 @@ const BleWebApp: React.FC = () => {
                 onWrite={(val) => manager.writeOnCharacteristic(val, setState)}
             />
             <SignalList signals={signals} onRowClick={handleSignalRowClick} />
-            <div style={{ display: 'flex', gap: 12, margin: '8px 0 0 0', justifyContent: 'flex-end' }}>
-                <button onClick={() => setShowHistory(true)} style={{ padding: '6px 18px', borderRadius: 6, border: 'none', background: '#232323', color: '#fff', fontWeight: 600, cursor: 'pointer' }}>View History</button>
-                <button onClick={handleExportSignals} style={{ padding: '6px 18px', borderRadius: 6, border: 'none', background: '#007cf0', color: '#fff', fontWeight: 600, cursor: 'pointer' }}>Export</button>
-                <button onClick={handleClearSignals} style={{ padding: '6px 18px', borderRadius: 6, border: 'none', background: '#f0004c', color: '#fff', fontWeight: 600, cursor: 'pointer' }}>Clear</button>
+            <div className="flex gap-3 mt-2 justify-end">
+                <button onClick={() => setShowHistory(true)} className="px-4 py-1.5 rounded-md border-none bg-neutral-800 text-white font-semibold cursor-pointer">View History</button>
+                <button onClick={handleExportSignals} className="px-4 py-1.5 rounded-md border-none bg-blue-500 text-white font-semibold cursor-pointer">Export</button>
+                <button onClick={handleClearSignals} className="px-4 py-1.5 rounded-md border-none bg-pink-600 text-white font-semibold cursor-pointer">Clear</button>
             </div>
             <SignalHistoryModal
                 isOpen={showHistory}

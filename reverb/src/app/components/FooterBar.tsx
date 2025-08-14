@@ -38,22 +38,9 @@ const FooterBar: React.FC<FooterBarProps> = ({
 
     return (
         <footer
-            style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '0.75rem 1.5rem',
-                background: '#222',
-                color: '#fff',
-                fontSize: '1rem',
-                position: 'fixed',
-                bottom: 0,
-                left: 0,
-                right: 0,
-                zIndex: 100,
-            }}
+            className="fixed bottom-0 left-0 right-0 z-[100] flex items-center justify-between px-6 py-3 bg-neutral-900 text-white text-base"
         >
-            <div style={{ display: 'flex', flexDirection: 'column', color: state.bleStateColor }}>
+            <div className="flex flex-col" style={{ color: state.bleStateColor }}>
                 <span>
                     <strong>
                         {isConnected
@@ -63,7 +50,7 @@ const FooterBar: React.FC<FooterBarProps> = ({
                                 : (state.bleState.includes('Error connecting')) ? `${state.bleState} ${deviceName}` : `${state.bleState}`}
                     </strong>
                 </span>
-                <span style={{ color: '#fff', fontSize: '0.95em', marginTop: 2 }}>
+                <span className="text-white text-sm mt-1">
                     {(isConnected && lastMessageTimestamp !== -1) ?
                         `Last message received ${secondsAgo}s ago`
                         : '-'}
@@ -80,25 +67,14 @@ const FooterBar: React.FC<FooterBarProps> = ({
                     }
                 }}
                 aria-label={isConnected ? 'Disconnect' : 'Connect'}
-                style={{
-                    padding: '0.5rem 1.2rem',
-                    background: isConnected ? '#e74c3c' : '#27ae60',
-                    color: '#fff',
-                    border: 'none',
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                    fontWeight: 600,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                }}
+                className={`px-5 py-2 rounded font-semibold flex items-center justify-center border-none ${isConnected ? 'bg-red-600' : 'bg-green-600'} text-white cursor-pointer`}
             >
                 <Image
                     src={isConnected ? "/disconnected.svg" : "/connected.svg"}
                     alt={isConnected ? "Disconnect" : "Connect"}
                     width={24}
                     height={24}
-                    style={{ display: 'block', filter: 'invert(1)' }}
+                    className="block invert"
                 />
             </button>
         </footer >

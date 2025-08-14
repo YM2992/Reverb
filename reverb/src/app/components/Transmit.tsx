@@ -71,28 +71,23 @@ const Transmit: React.FC<TransmitProps> = ({ onTransmit, onStart, onStop, value:
     return (
         <div className="mx-auto w-full max-w-2xl my-3">
             {/* Value row */}
-            <div style={{ display: "flex", gap: 16, alignItems: "flex-end", marginBottom: 8 }}>
-                <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column" }}>
-                    <label htmlFor="transmit-value" style={{ fontWeight: 500, marginBottom: 4 }}>Value</label>
+            <div className="flex gap-4 items-end mb-2">
+                <div className="flex-1 min-w-0 flex flex-col">
+                    <label htmlFor="transmit-value" className="font-medium mb-1">Value</label>
                     <input
                         id="transmit-value"
                         type="text"
                         value={value}
                         onChange={e => setValue(e.target.value)}
                         placeholder="Value"
-                        style={{
-                            padding: "10px 12px",
-                            borderRadius: 6,
-                            border: "1px solid #ccc",
-                            fontSize: "1rem",
-                        }}
+                        className="px-3 py-2 rounded-md border border-gray-300 text-base"
                     />
                 </div>
             </div>
             {/* Timeout and Repeat row */}
-            <div style={{ display: "flex", gap: 16, alignItems: "flex-end", marginBottom: 8 }}>
-                <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column" }}>
-                    <label htmlFor="transmit-timeout" style={{ fontWeight: 500, marginBottom: 4 }}>Timeout (ms)</label>
+            <div className="flex gap-4 items-end mb-2">
+                <div className="flex-1 min-w-0 flex flex-col">
+                    <label htmlFor="transmit-timeout" className="font-medium mb-1">Timeout (ms)</label>
                     <input
                         id="transmit-timeout"
                         type="number"
@@ -101,16 +96,11 @@ const Transmit: React.FC<TransmitProps> = ({ onTransmit, onStart, onStop, value:
                         placeholder="Timeout (ms)"
                         min={1}
                         max={60000}
-                        style={{
-                            padding: "10px 12px",
-                            borderRadius: 6,
-                            border: "1px solid #ccc",
-                            fontSize: "1rem",
-                        }}
+                        className="px-3 py-2 rounded-md border border-gray-300 text-base"
                     />
                 </div>
-                <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column" }}>
-                    <label htmlFor="transmit-repeat" style={{ fontWeight: 500, marginBottom: 4 }}>Repeat (ms)</label>
+                <div className="flex-1 min-w-0 flex flex-col">
+                    <label htmlFor="transmit-repeat" className="font-medium mb-1">Repeat (ms)</label>
                     <input
                         id="transmit-repeat"
                         type="number"
@@ -119,73 +109,30 @@ const Transmit: React.FC<TransmitProps> = ({ onTransmit, onStart, onStop, value:
                         placeholder="Repeat (ms)"
                         min={1}
                         max={10000}
-                        style={{
-                            padding: "10px 12px",
-                            borderRadius: 6,
-                            border: "1px solid #ccc",
-                            fontSize: "1rem",
-                        }}
+                        className="px-3 py-2 rounded-md border border-gray-300 text-base"
                     />
                 </div>
             </div>
             {/* Buttons row */}
-            <div style={{ display: "flex", gap: 12, marginTop: 8, flexWrap: "wrap" }}>
+            <div className="flex gap-3 mt-2 flex-wrap">
                 <button
                     onClick={handleTransmit}
                     disabled={value.trim() === "" || !bleConnected}
-                    style={{
-                        flex: "1 1 55px",
-                        minWidth: 0,
-                        padding: "10px 0",
-                        borderRadius: 6,
-                        border: "none",
-                        background: (value.trim() === "" || !bleConnected) ? "#b0b0b0" : "linear-gradient(90deg, #007cf0 0%, #00dfd8 100%)",
-                        color: "#fff",
-                        fontWeight: 600,
-                        fontSize: "1rem",
-                        opacity: value.trim() === "" ? 0.7 : 1,
-                        cursor: value.trim() === "" ? "not-allowed" : "pointer",
-                    }}
+                    className={`flex-1 min-w-0 py-2 rounded-md border-none text-white font-semibold text-base ${value.trim() === "" || !bleConnected ? 'bg-gray-400 cursor-not-allowed opacity-70' : 'bg-gradient-to-r from-blue-500 to-cyan-400 cursor-pointer'}`}
                 >
                     Transmit Once
                 </button>
                 <button
                     onClick={handleClear}
                     disabled={value.trim() === "" || !bleConnected}
-                    style={{
-                        flex: "0 1 55px",
-                        minWidth: 0,
-                        padding: "10px 0",
-                        borderRadius: 6,
-                        border: "none",
-                        background: (value.trim() === "" || !bleConnected) ? "#b0b0b0" : "#888",
-                        color: "#fff",
-                        fontWeight: 600,
-                        fontSize: "1rem",
-                        opacity: value.trim() === "" ? 0.7 : 1,
-                        cursor: value.trim() === "" ? "not-allowed" : "pointer",
-                    }}
+                    className={`flex-none min-w-0 py-2 rounded-md border-none text-white font-semibold text-base ${value.trim() === "" || !bleConnected ? 'bg-gray-400 cursor-not-allowed opacity-70' : 'bg-gray-600 cursor-pointer'}`}
                 >
                     Clear
                 </button>
                 <button
                     onClick={handleStartStop}
                     disabled={(!isTransmitting && (value.trim() === "" || !bleConnected))}
-                    style={{
-                        flex: "0 1 150px",
-                        minWidth: 0,
-                        padding: "10px 0",
-                        borderRadius: 6,
-                        border: "none",
-                        background: isTransmitting
-                            ? "linear-gradient(90deg, #f0004c 0%, #ff7a18 100%)"
-                            : (value.trim() === "" || !bleConnected) ? "#b0b0b0" : "linear-gradient(90deg, #24af37 0%, #24af37 100%)",
-                        color: "#fff",
-                        fontWeight: 600,
-                        fontSize: "1rem",
-                        opacity: !isTransmitting && value.trim() === "" ? 0.7 : 1,
-                        cursor: !isTransmitting && value.trim() === "" ? "not-allowed" : "pointer",
-                    }}
+                    className={`flex-none min-w-0 py-2 rounded-md border-none text-white font-semibold text-base ${isTransmitting ? 'bg-gradient-to-r from-pink-600 to-orange-400 cursor-pointer' : (value.trim() === "" || !bleConnected) ? 'bg-gray-400 cursor-not-allowed opacity-70' : 'bg-green-600 cursor-pointer'}`}
                 >
                     {isTransmitting ? "Stop Transmitting" : "Start Transmitting"}
                 </button>

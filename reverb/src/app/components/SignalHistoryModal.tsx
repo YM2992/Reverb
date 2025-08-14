@@ -12,38 +12,37 @@ const SignalHistoryModal: React.FC<SignalHistoryModalProps> = ({ isOpen, onClose
     if (!isOpen) return null;
     return (
         <div
-            className="modal-overlay"
-            style={{ position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh", background: "rgba(0,0,0,0.7)", zIndex: 1000 }}
+            className="fixed top-0 left-0 w-screen h-screen bg-black bg-opacity-70 z-[1000] flex items-center justify-center"
             onClick={onClose}
         >
             <div
-                className="modal-content"
-                style={{ background: "#232323", color: "#fff", margin: "10vh auto", padding: 24, borderRadius: 12, maxWidth: 800, minHeight: 300, position: "relative", boxShadow: "0 4px 32px #000a" }}
+                className="bg-neutral-900 text-white mx-auto p-6 rounded-xl max-w-3xl min-h-[300px] relative shadow-2xl w-full"
+                style={{ marginTop: '10vh', marginBottom: '10vh' }}
                 onClick={e => e.stopPropagation()}
             >
-                <h2 style={{ marginTop: 0, color: '#fff' }}>Signal History</h2>
-                <button onClick={onClose} style={{ position: "absolute", top: 12, right: 12, background: '#232323', color: '#fff', border: '1px solid #444', borderRadius: 6, padding: '6px 18px', fontWeight: 600, cursor: 'pointer' }}>Close</button>
-                <button onClick={onClear} style={{ position: "absolute", top: 12, right: 110, background: '#f0004c', color: '#fff', border: 'none', borderRadius: 6, padding: '6px 18px', fontWeight: 600, cursor: 'pointer' }}>Clear History</button>
-                <div style={{ maxHeight: 400, overflowY: "auto", marginTop: 32 }}>
-                    <table style={{ width: "100%", borderCollapse: "collapse", background: 'transparent', color: '#fff', fontFamily: 'monospace', fontSize: 14 }}>
+                <h2 className="mt-0 text-white text-xl font-bold">Signal History</h2>
+                <button onClick={onClose} className="absolute top-3 right-3 bg-neutral-900 text-white border border-gray-600 rounded-md px-4 py-1.5 font-semibold cursor-pointer">Close</button>
+                <button onClick={onClear} className="absolute top-3 right-32 bg-pink-600 text-white border-none rounded-md px-4 py-1.5 font-semibold cursor-pointer">Clear History</button>
+                <div className="max-h-[400px] overflow-y-auto mt-8">
+                    <table className="w-full border-collapse bg-transparent text-white font-mono text-sm">
                         <thead>
                             <tr>
-                                <th style={{ borderBottom: "1px solid #444", color: '#fff', padding: '6px 8px' }}>Time</th>
-                                <th style={{ borderBottom: "1px solid #444", color: '#fff', padding: '6px 8px' }}>Frequency (MHz)</th>
-                                <th style={{ borderBottom: "1px solid #444", color: '#fff', padding: '6px 8px' }}>Data</th>
-                                <th style={{ borderBottom: "1px solid #444", color: '#fff', padding: '6px 8px' }}>RSSI</th>
+                                <th className="border-b border-gray-700 text-white px-2 py-2">Time</th>
+                                <th className="border-b border-gray-700 text-white px-2 py-2">Frequency (MHz)</th>
+                                <th className="border-b border-gray-700 text-white px-2 py-2">Data</th>
+                                <th className="border-b border-gray-700 text-white px-2 py-2">RSSI</th>
                             </tr>
                         </thead>
                         <tbody>
                             {history.length === 0 ? (
-                                <tr><td colSpan={4} style={{ textAlign: "center", color: '#aaa', padding: 16 }}>No history</td></tr>
+                                <tr><td colSpan={4} className="text-center text-gray-400 py-4">No history</td></tr>
                             ) : (
                                 history.slice().reverse().map((signal, idx) => (
                                     <tr key={idx}>
-                                        <td style={{ padding: '6px 8px', borderBottom: '1px solid #333' }}>{signal.timestamp ? new Date(signal.timestamp).toLocaleString() : "-"}</td>
-                                        <td style={{ padding: '6px 8px', borderBottom: '1px solid #333' }}>{signal.frequency ?? "-"}</td>
-                                        <td style={{ padding: '6px 8px', borderBottom: '1px solid #333' }}>{signal.data}</td>
-                                        <td style={{ padding: '6px 8px', borderBottom: '1px solid #333' }}>{signal.rssi ?? "-"}</td>
+                                        <td className="px-2 py-2 border-b border-gray-800">{signal.timestamp ? new Date(signal.timestamp).toLocaleString() : "-"}</td>
+                                        <td className="px-2 py-2 border-b border-gray-800">{signal.frequency ?? "-"}</td>
+                                        <td className="px-2 py-2 border-b border-gray-800">{signal.data}</td>
+                                        <td className="px-2 py-2 border-b border-gray-800">{signal.rssi ?? "-"}</td>
                                     </tr>
                                 ))
                             )}

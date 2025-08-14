@@ -77,47 +77,39 @@ export default function SignalList({ signals, onRowClick }: SignalListProps) {
 
   return (
     <div className="mx-auto max-w-4xl w-full">
-      <h2 style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <h2 className="flex items-center justify-between">
         <span>Detected Signals</span>
-        <span style={{ fontSize: '0.95em', color: '#aaa', fontWeight: 400 }}>
-          Total: {signals.length}
-        </span>
+        <span className="text-base text-gray-400 font-normal">Total: {signals.length}</span>
       </h2>
-      <div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center', marginBottom: 4 }}>
-        <span style={{ color: '#b5e0ff', fontFamily: 'monospace', fontSize: '1.05em', letterSpacing: 0.5 }}>
-          {now.toLocaleString()}
-        </span>
+      <div className="flex justify-start items-center mb-1">
+        <span className="text-sky-200 font-mono text-base tracking-wide">{now.toLocaleString()}</span>
       </div>
-      <div style={tableContainerStyle}>
-        <table style={tableStyle}>
+      <div className="max-h-80 overflow-y-auto my-4 rounded-lg bg-neutral-900">
+        <table className="w-full border-collapse bg-transparent text-white">
           <thead>
             <tr>
-              <th style={thStyle}>Timestamp</th>
-              <th style={thNarrow}>Frequency (MHz)</th>
-              <th style={thStyle}>Data</th>
-              <th style={thNarrow}>RSSI (dBm)</th>
+              <th className="bg-neutral-800 px-3 py-2 text-left font-bold border-b-2 border-gray-700 sticky top-0 z-10">Timestamp</th>
+              <th className="bg-neutral-800 px-2 py-2 text-right font-bold border-b-2 border-gray-700 sticky top-0 z-10 w-24 min-w-[70px] max-w-[110px]">Frequency (MHz)</th>
+              <th className="bg-neutral-800 px-3 py-2 text-left font-bold border-b-2 border-gray-700 sticky top-0 z-10">Data</th>
+              <th className="bg-neutral-800 px-2 py-2 text-right font-bold border-b-2 border-gray-700 sticky top-0 z-10 w-24 min-w-[70px] max-w-[110px]">RSSI (dBm)</th>
             </tr>
           </thead>
           <tbody>
             {sortedSignals.length === 0 ? (
               <tr>
-                <td colSpan={4} style={{ ...tdStyle, textAlign: 'center', color: '#aaa' }}>
-                  No signals detected.
-                </td>
+                <td colSpan={4} className="text-center text-gray-400 font-mono py-3">No signals detected.</td>
               </tr>
             ) : (
               sortedSignals.map((signal) => (
                 <tr
                   key={signal.id}
-                  style={onRowClick ? { cursor: 'pointer', background: '#232323' } : {}}
+                  className={onRowClick ? 'cursor-pointer bg-neutral-800 hover:bg-neutral-700 transition-colors' : ''}
                   onClick={onRowClick ? () => onRowClick(signal) : undefined}
-                  onMouseOver={onRowClick ? (e) => { (e.currentTarget as HTMLTableRowElement).style.background = '#333'; } : undefined}
-                  onMouseOut={onRowClick ? (e) => { (e.currentTarget as HTMLTableRowElement).style.background = '#232323'; } : undefined}
                 >
-                  <td style={tdDate}>{new Date(signal.timestamp).toLocaleString()}</td>
-                  <td style={tdNarrow}>{signal.frequency}</td>
-                  <td style={tdStyle}>{signal.data}</td>
-                  <td style={tdNarrow}>{signal.rssi}</td>
+                  <td className="px-3 py-2 font-mono border-b border-gray-700 text-sky-200 text-sm whitespace-nowrap">{new Date(signal.timestamp).toLocaleString()}</td>
+                  <td className="px-2 py-2 font-mono border-b border-gray-700 text-right w-24 min-w-[70px] max-w-[110px]">{signal.frequency}</td>
+                  <td className="px-3 py-2 font-mono border-b border-gray-700">{signal.data}</td>
+                  <td className="px-2 py-2 font-mono border-b border-gray-700 text-right w-24 min-w-[70px] max-w-[110px]">{signal.rssi}</td>
                 </tr>
               ))
             )}
