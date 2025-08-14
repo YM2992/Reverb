@@ -111,9 +111,17 @@ const BleWebApp: React.FC = () => {
     // Update signals when new BLE data is received
     useEffect(() => {
         if (!state.lastValueReceived || state.lastValueReceived === '-') return;
-        let parsed: any;
+        type ParsedSignal = {
+            data?: string | number;
+            value?: string | number;
+            freq?: number | string;
+            frequency?: number | string;
+            rssi?: number;
+            protocol?: string;
+        };
+        let parsed: ParsedSignal;
         try {
-            parsed = JSON.parse(state.lastValueReceived);
+            parsed = JSON.parse(state.lastValueReceived) as ParsedSignal;
         } catch {
             return;
         }
