@@ -1,4 +1,6 @@
-![Reverb Icon](reverb/public/reverb_icon.png){ width=90 }
+<p align="left">
+   <img src="reverb/public/reverb_icon.png" alt="Reverb Icon" width="90" style="vertical-align:middle; margin-right: 12px;" />
+</p>
 
 # Reverb
 
@@ -50,13 +52,13 @@ This project requires the following hardware components:
 3. ***(Optional)*** Add the app to your device's home screen for easy access (see [PWA Installation](#pwa-installation) below)
 
 4. Press the **connect** button  
-![Main page - disconnected](/assets/quickstart/Step1.png){ width=200 }
+<img src="assets/quickstart/Step1.png" alt="Main page - disconnected" width="200" />
 
 5. Follow the pairing process  
-![Pairing process](/assets/quickstart/Step2.png){ width=200 }
+<img src="assets/quickstart/Step2.png" alt="Pairing process" width="200" />
 
 6. Enjoy!  
-![Main page - connected](/assets/quickstart/Step3.jpg){ width=200 }
+<img src="assets/quickstart/Step3.jpg" alt="Main page - connected" width="200" />
 
 ## Getting Started
 
