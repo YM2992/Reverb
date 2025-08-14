@@ -1,7 +1,8 @@
 <p align="left">
    <img src="reverb/public/reverb_icon.png" alt="Reverb Icon" width="48" style="vertical-align:middle; margin-right: 12px;" />
-   <span style="font-size:2.5rem; vertical-align:middle;"><b>Reverb</b></span>
 </p>
+
+# Reverb
 
 This project is a companion application for an ESP32 device equipped with a CC1101 module. It enables you to connect to your ESP32 over BLE, view and replay received
 [sub-GHz RF signals](https://www.reddit.com/r/flipperzero/comments/1bkmqm6/guys_i_need_help_because_i_dont_know_what_subghz/#:~:text=%E2%80%9CSub%2DGHz%E2%80%9D%20refers%20to,for%20transmissions%20in%20that%20range.)
@@ -25,14 +26,14 @@ from a web interface.
 
 ## Hardware
 
-- ESP32
-- CC1101
+This project requires the following hardware components:
 
-## Hardware Diagram
+- **ESP32**: The main microcontroller responsible for BLE communication and signal processing.
+- **CC1101**: A sub-GHz RF transceiver module used for receiving and transmitting RF signals.
 
-<div style="background: linear-gradient(135deg, #f0f4f8 0%, #d9e7fa 100%); padding: 32px; border-radius: 16px; text-align: center; margin-bottom: 24px;">
-   <img src="assets/hardware_diagram.svg" alt="Hardware Diagram" style="max-width: 90%; width: 700px; min-width: 320px; height: auto; display: inline-block;" />
-</div>
+### Hardware Diagram
+
+![Hardware Diagram](assets/hardware_diagram.svg)
 
 ## Getting Started
 
@@ -76,6 +77,7 @@ npm start
 ### Using the App
 
 On your bluetooth-enabled device:
+
 1. Open [http://HOST_IP:3000](http://HOST_IP:3000) in your browser.
 
    (replace HOST_IP with the actual IP address of the machine running the app)
@@ -86,7 +88,13 @@ On your bluetooth-enabled device:
 
 ## App
 
-[screenshots to come]
+### Main Screen
+
+![Main screen](assets/Screenshot_20250814_170226_Chrome.jpg)
+
+### Signal History Screen
+
+![Signal History Screen](assets/Screenshot_20250814_170726_Chrome.jpg)
 
 ## License
 
@@ -95,5 +103,5 @@ MIT License.
 ## Credits
 
 - Inspiration from [SubMarine](https://github.com/simondankelmann/SubMarine)
-- BLE and web UI based on [Random Nerd Tutorials](https://randomnerdtutorials.com/esp32-web-bluetooth/).
-- Icons from [SVG Repo](https://www.svgrepo.com/)
+- BLE and web UI connection based on [Random Nerd Tutorials](https://randomnerdtutorials.com/esp32-web-bluetooth/).
+- Disconnect/Reconnect icons from [SVG Repo](https://www.svgrepo.com/)
