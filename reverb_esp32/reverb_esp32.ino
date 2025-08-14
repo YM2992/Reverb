@@ -38,6 +38,13 @@ unsigned long lastTxValue = 0;
 unsigned int lastTxBitLength = 24; // Default bit length for TX
 unsigned long lastTxReceivedMillis = 0;
 
+// --- TX Command Parsing and State ---
+unsigned long continualTxValue = 0;
+unsigned int continualTxBitLength = 24;
+unsigned long continualTxStartMillis = 0;
+bool continualTxActive = false;
+const unsigned long CONTINUAL_TX_TIMEOUT = 5000;
+
 RCSwitch rcSwitch = RCSwitch();
 
 // Class to handle CC1101 and RCSwitch initialization and operations
@@ -112,19 +119,10 @@ public:
 
   void sendSignal(unsigned long value, unsigned int length)
   {
+
     if (txPin == -1)
     {
       Serial.println("TX pin not set, cannot send signal.");
-      currentMode = MODE_RX;
-      lastTxValue = 0;
-      lastTxBitLength = 0;
-      Serial.println("Switched to RX mode");
-      return;
-    }
-
-    if (!rcSwitch.available())
-    {
-      Serial.println("RCSwitch not available, cannot send signal.");
       currentMode = MODE_RX;
       lastTxValue = 0;
       lastTxBitLength = 0;
@@ -153,6 +151,22 @@ private:
 // Create a global instance for CC1101 and RCSwitch management
 CC1101RCSwitchManager cc1101Manager(cc1101RxPin, cc1101TxPin);
 
+bool parseTxMessage(const String &msg, int &txMode, unsigned long &data)
+{
+  // Format: "TX,[0/1/2],[data]"
+  if (!msg.startsWith("TX,"))
+    return false;
+  int firstComma = msg.indexOf(',', 3);
+  if (firstComma == -1)
+    return false;
+  String modeStr = msg.substring(3, firstComma);
+  int secondComma = msg.indexOf(',', firstComma + 1);
+  String dataStr = (secondComma == -1) ? msg.substring(firstComma + 1) : msg.substring(firstComma + 1, secondComma);
+  txMode = modeStr.toInt();
+  data = dataStr.toInt();
+  return true;
+}
+
 class MyServerCallbacks : public BLEServerCallbacks
 {
   void onConnect(BLEServer *pServer)
@@ -175,25 +189,38 @@ class MyCharacteristicCallbacks : public BLECharacteristicCallbacks
     {
       if (value.length() > 0)
       {
-        // Accept both stringified numbers and raw bytes
-        unsigned long txValue = 0;
-        if (value.length() >= 4)
+        int txMode = -1;
+        unsigned long txData = 0;
+        if (parseTxMessage(value, txMode, txData))
         {
-          txValue = *reinterpret_cast<const uint32_t *>(value.c_str());
+          Serial.print("Parsed TX message: mode=");
+          Serial.print(txMode);
+          Serial.print(", data=");
+          Serial.println(txData);
+          handleTxCommand(txMode, txData);
         }
         else
         {
-          txValue = value.toInt();
+          // Fallback: Accept both stringified numbers and raw bytes
+          unsigned long txValue = 0;
+          if (value.length() >= 4)
+          {
+            txValue = *reinterpret_cast<const uint32_t *>(value.c_str());
+          }
+          else
+          {
+            txValue = value.toInt();
+          }
+          lastTxValue = txValue;
+          lastTxBitLength = 24; // You may want to set this dynamically
+          Serial.print("Received TX value: ");
+          Serial.println(lastTxValue);
+          // Switch to TX mode and record time
+          currentMode = MODE_TX;
+          lastTxReceivedMillis = millis();
+          cc1101Manager.sendSignal(lastTxValue, lastTxBitLength);
+          lastTxValue = 0;
         }
-        lastTxValue = txValue;
-        lastTxBitLength = 24; // You may want to set this dynamically
-        Serial.print("Received TX value: ");
-        Serial.println(lastTxValue);
-        // Switch to TX mode and record time
-        currentMode = MODE_TX;
-        lastTxReceivedMillis = millis();
-        cc1101Manager.sendSignal(lastTxValue, lastTxBitLength);
-        lastTxValue = 0;
       }
     }
     else if (pChar->getUUID().toString() == MODE_CHARACTERISTIC_UUID)
@@ -211,6 +238,42 @@ class MyCharacteristicCallbacks : public BLECharacteristicCallbacks
     }
   }
 };
+
+void handleTxCommand(int txMode, unsigned long data)
+{
+  switch (txMode)
+  {
+  case 0: // STOP TX
+    continualTxActive = false;
+    continualTxValue = 0;
+    currentMode = MODE_RX;
+    Serial.println("TX STOPPED, switching to RX mode");
+    break;
+  case 1: // TRANSMIT ONCE
+    continualTxActive = false;
+    continualTxValue = 0;
+    currentMode = MODE_TX;
+    lastTxValue = data;
+    lastTxBitLength = 24;
+    lastTxReceivedMillis = millis();
+    cc1101Manager.sendSignal(lastTxValue, lastTxBitLength);
+    lastTxValue = 0;
+    currentMode = MODE_RX;
+    Serial.println("TX ONCE complete, switching to RX mode");
+    break;
+  case 2: // CONTINUAL TRANSMISSION
+    continualTxActive = true;
+    continualTxValue = data;
+    continualTxBitLength = 24;
+    continualTxStartMillis = millis();
+    currentMode = MODE_TX;
+    Serial.println("CONTINUAL TX STARTED");
+    break;
+  default:
+    Serial.println("Unknown TX mode");
+    break;
+  }
+}
 
 void setup()
 {
@@ -278,18 +341,30 @@ void loop()
   // If in TX mode, check for timeout
   if (currentMode == MODE_TX)
   {
-    // TX mode: transmit the last value received from BLE
-    // if (lastTxValue != 0)
-    // {
-    //   cc1101Manager.sendSignal(lastTxValue, lastTxBitLength);
-    //   delay(500);      // avoid spamming TX, adjust as needed
-    //   lastTxValue = 0; // Only send once per value
-    // }
-    // If no new TX value for 2s, switch back to RX
-    if (now - lastTxReceivedMillis > TX_RX_DEBOUNCE)
+    if (continualTxActive)
     {
-      currentMode = MODE_RX;
-      Serial.println("TX timeout, switching back to RX mode");
+      // Continual transmission mode
+      if (millis() - continualTxStartMillis > CONTINUAL_TX_TIMEOUT)
+      {
+        continualTxActive = false;
+        continualTxValue = 0;
+        currentMode = MODE_RX;
+        Serial.println("CONTINUAL TX TIMEOUT, switching to RX mode");
+      }
+      else
+      {
+        cc1101Manager.sendSignal(continualTxValue, continualTxBitLength);
+        delay(100); // adjust as needed for repeat rate
+      }
+    }
+    else
+    {
+      // If no new TX value for 2s, switch back to RX
+      if (now - lastTxReceivedMillis > TX_RX_DEBOUNCE)
+      {
+        currentMode = MODE_RX;
+        Serial.println("TX timeout, switching back to RX mode");
+      }
     }
   }
   else if (currentMode == MODE_RX)
