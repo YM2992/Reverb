@@ -43,17 +43,19 @@ This project requires the following hardware components:
 
 ## Quickstart
 
-1. Navigate to [reverb.yasir.com.au](https://reverb.yasir.com.au) on a mobile or bluetooth-enabled device
+1. Download and flash the latest [firmware code](https://github.com/YM2992/Reverb/blob/main/reverb_esp32/reverb_esp32.ino) to your ESP32
 
-2. **(Optional)** Add the app to your device's home screen for easy access (see [PWA Installation](#pwa-installation) below)
+2. Navigate to [reverb.yasir.com.au](https://reverb.yasir.com.au) on a mobile or bluetooth-enabled device
 
-3. Press the "Connect" button
+3. ***(Optional)*** Add the app to your device's home screen for easy access (see [PWA Installation](#pwa-installation) below)
+
+4. Press the **connect** button
 ![Main page - disconnected](/assets/quickstart/Step1.png)
 
-4. Follow the pairing process
+5. Follow the pairing process
 ![Pairing process](/assets/quickstart/Step2.png)
 
-5. Enjoy!
+6. Enjoy!
 ![Main page - connected](/assets/quickstart/Step3.jpg)
 
 ## Getting Started
