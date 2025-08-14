@@ -64,6 +64,7 @@ const BleWebApp: React.FC = () => {
         lastReceivedTimestamp: -1,
     });
     const [manager] = useState(() => new BluetoothManager());
+    const [bleDisconnected, setBleDisconnected] = useState(false);
 
     // Load signals from localStorage on mount
     const [signals, setSignals] = useState<Signal[]>(() => SignalStorage.loadSignals());
@@ -187,8 +188,40 @@ const BleWebApp: React.FC = () => {
         setTransmitValue(signal.data);
     };
 
+    // BLE disconnect detection and visual response using BluetoothManager's handler and actual connection polling
+    useEffect(() => {
+        manager.onDisconnectHandler(() => {
+            setBleDisconnected(true);
+        });
+        // Poll actual connection every 2 seconds
+        setBleDisconnected(!manager.isActuallyConnected());
+        const poll = setInterval(() => {
+            setBleDisconnected(!manager.isActuallyConnected());
+        }, 2000);
+        return () => clearInterval(poll);
+    }, [manager]);
+
     return (
-        <div style={{ padding: '20px', marginBottom: '80px' }}>
+        <div style={{ padding: '20px', marginBottom: '80px', position: 'relative' }}>
+            {bleDisconnected && (
+                <div style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    width: '100vw',
+                    background: '#d13a30',
+                    color: '#fff',
+                    fontWeight: 700,
+                    fontSize: 18,
+                    textAlign: 'center',
+                    padding: '14px 0',
+                    zIndex: 2000,
+                    boxShadow: '0 2px 12px #000a',
+                    letterSpacing: 1,
+                }}>
+                    BLE Disconnected. Please reconnect your device.
+                </div>
+            )}
             <BleWebAppUI
                 state={state}
                 onConnect={() => manager.connect(setState)}
@@ -197,7 +230,7 @@ const BleWebApp: React.FC = () => {
             />
             <SignalList signals={signals} onRowClick={handleSignalRowClick} />
             <div style={{ display: 'flex', gap: 12, margin: '8px 0 0 0', justifyContent: 'flex-end' }}>
-                <button onClick={()=>setShowHistory(true)} style={{ padding: '6px 18px', borderRadius: 6, border: 'none', background: '#232323', color: '#fff', fontWeight: 600, cursor: 'pointer' }}>View History</button>
+                <button onClick={() => setShowHistory(true)} style={{ padding: '6px 18px', borderRadius: 6, border: 'none', background: '#232323', color: '#fff', fontWeight: 600, cursor: 'pointer' }}>View History</button>
                 <button onClick={handleExportSignals} style={{ padding: '6px 18px', borderRadius: 6, border: 'none', background: '#007cf0', color: '#fff', fontWeight: 600, cursor: 'pointer' }}>Export</button>
                 <button onClick={handleClearSignals} style={{ padding: '6px 18px', borderRadius: 6, border: 'none', background: '#f0004c', color: '#fff', fontWeight: 600, cursor: 'pointer' }}>Clear</button>
             </div>
@@ -218,7 +251,7 @@ const BleWebApp: React.FC = () => {
             <SignalReplay signals={signals} onReplay={handleReplay} />
             <FooterBar
                 state={state}
-                isConnected={state.bleState.includes("Connected")}
+                isConnected={!bleDisconnected}
                 deviceName={state.deviceName}
                 lastMessageTimestamp={state.lastReceivedTimestamp}
                 onConnect={() => manager.connect(setState)}

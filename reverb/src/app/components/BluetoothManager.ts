@@ -12,6 +12,14 @@ export type BluetoothState = {
 };
 
 export class BluetoothManager {
+    private device: BluetoothDevice | null = null;
+    private disconnectHandlers: Array<() => void> = [];
+    /**
+     * Register a handler to be called when BLE disconnects.
+     */
+    public onDisconnectHandler(handler: () => void) {
+        this.disconnectHandlers.push(handler);
+    }
     private deviceName = "Reverber";
     private bleService = "a78662a0-ec99-41ab-89c1-80669d309a56";
     private sensorCharacteristic = "089b232b-0302-4ae1-92e1-2f7ca3be3827";
@@ -46,6 +54,14 @@ export class BluetoothManager {
         return true;
     }
 
+    /**
+     * Returns true if the BLE device is actually connected at the GATT level.
+     */
+    public isActuallyConnected(): boolean {
+        // @ts-expect-error: Web Bluetooth API
+        return !!(this.device && this.device.gatt && this.device.gatt.connected);
+    }
+
     async connect(onStateChange: (state: BluetoothState) => void) {
         if (!this.isWebBluetoothEnabled()) {
             onStateChange(this.state);
@@ -60,6 +76,8 @@ export class BluetoothManager {
             const device = await nav.bluetooth.requestDevice({
                 filters: [{ services: [this.bleService] }]
             });
+            this.device = device;
+            this.device = device;
             this.setState({ bleState: `Connected to device ${device.name}`, bleStateColor: "#24af37", deviceName: device.name, connectionEstablishedTimestamp: Date.now() });
             onStateChange(this.state);
             device.addEventListener("gattservicedisconnected", () => this.onDisconnected(onStateChange));
@@ -84,6 +102,10 @@ export class BluetoothManager {
     private onDisconnected(onStateChange: (state: BluetoothState) => void) {
         this.setState({ bleState: "Device disconnected", bleStateColor: "#d13a30", deviceName: "-", connectionEstablishedTimestamp: -1, lastReceivedTimestamp: -1 });
         onStateChange(this.state);
+        // Call all registered disconnect handlers
+        for (const handler of this.disconnectHandlers) {
+            try { handler(); } catch { }
+        }
     }
 
     private handleCharacteristicChange(event: Event, onStateChange: (state: BluetoothState) => void) {
