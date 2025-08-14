@@ -47,7 +47,14 @@ This project requires the following hardware components:
 
 2. **(Optional)** Add the app to your device's home screen for easy access (see [PWA Installation](#pwa-installation) below)
 
-3. 
+3. Press the "Connect" button
+![Main page - disconnected](/assets/quickstart/Step1.png)
+
+4. Follow the pairing process
+![Pairing process](/assets/quickstart/Step2.png)
+
+5. Enjoy!
+![Main page - connected](/assets/quickstart/Step3.jpg)
 
 ## Getting Started
 
@@ -98,7 +105,7 @@ On your bluetooth-enabled device:
 
 ### PWA Installation
 
-- On mobile, open the app in Chrome or Safari and use "Add to Home Screen" to install as a PWA.
+- On mobile, open the app in Chrome or Safari and use "Add to Home Screen" or "Install App" to install as a PWA.
 
 ## License
 
