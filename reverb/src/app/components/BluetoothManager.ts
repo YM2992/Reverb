@@ -114,6 +114,26 @@ export class BluetoothManager {
         }
     }
 
+    async writeStringCommandOnCharacteristic(cmd: string, onStateChange: (state: BluetoothState) => void) {
+        const server = this.bleServer as { connected?: boolean } | null;
+        const service = this.bleServiceFound as { getCharacteristic?: (uuid: string) => Promise<unknown> } | null;
+        if (server && server.connected) {
+            try {
+                if (!service || typeof service.getCharacteristic !== 'function') throw new Error("BLE service not found");
+                const characteristic = await service.getCharacteristic(this.ledCharacteristic) as { writeValue?: (data: ArrayBuffer) => Promise<void> };
+                const encoder = new TextEncoder();
+                const data = encoder.encode(cmd);
+                if (characteristic.writeValue) await characteristic.writeValue(data.buffer);
+                this.setState({ lastValueSent: cmd });
+                onStateChange(this.state);
+            } catch (error) {
+                window.alert("Error writing string command to the LED characteristic.\n" + error);
+            }
+        } else {
+            window.alert("Bluetooth is not connected. Cannot write to characteristic. Connect to BLE first!");
+        }
+    }
+
     async disconnect(onStateChange: (state: BluetoothState) => void) {
         const server = this.bleServer as { connected?: boolean; disconnect?: () => Promise<void> } | null;
         const characteristic = this.sensorCharacteristicFound as { stopNotifications?: () => Promise<void> } | null;

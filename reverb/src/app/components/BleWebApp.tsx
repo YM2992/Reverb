@@ -142,42 +142,34 @@ const BleWebApp: React.FC = () => {
     };
 
     // Transmit logic
-    const transmitInterval = React.useRef<NodeJS.Timeout | null>(null);
     const [transmitValue, setTransmitValue] = useState("");
 
+
+    // --- TX Protocol Implementation ---
     const handleTransmitOnce = (value: string) => {
         const num = Number(value);
         if (!isNaN(num)) {
-            manager.writeOnCharacteristic(num, setState);
+            // TX,1,[data]
+            manager.writeStringCommandOnCharacteristic(`TX,1,${num}`, setState);
         } else {
             window.alert("Please enter a valid number to transmit.");
         }
     };
 
     const handleStartTransmit = (value: string) => {
-        if (transmitInterval.current) return;
         const num = Number(value);
         if (isNaN(num)) {
             window.alert("Please enter a valid number to transmit.");
             return;
         }
-        transmitInterval.current = setInterval(() => {
-            manager.writeOnCharacteristic(num, setState);
-        }, 1000);
+        // Send TX,2,[data] to start continual transmission
+        manager.writeStringCommandOnCharacteristic(`TX,2,${num}`, setState);
     };
 
     const handleStopTransmit = () => {
-        if (transmitInterval.current) {
-            clearInterval(transmitInterval.current);
-            transmitInterval.current = null;
-        }
+        // Send TX,0,0 to stop continual transmission
+        manager.writeStringCommandOnCharacteristic(`TX,0,0`, setState);
     };
-
-    React.useEffect(() => {
-        return () => {
-            if (transmitInterval.current) clearInterval(transmitInterval.current);
-        };
-    }, []);
 
     // Handler for clicking a signal row to auto-fill transmit value
     const handleSignalRowClick = (signal: Signal) => {
