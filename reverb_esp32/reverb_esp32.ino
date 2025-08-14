@@ -119,7 +119,6 @@ public:
 
   void sendSignal(unsigned long value, unsigned int length)
   {
-
     if (txPin == -1)
     {
       Serial.println("TX pin not set, cannot send signal.");
@@ -127,6 +126,7 @@ public:
       lastTxValue = 0;
       lastTxBitLength = 0;
       Serial.println("Switched to RX mode");
+      forceRxMode();
       return;
     }
 
@@ -138,6 +138,14 @@ public:
     Serial.println(value);
 
     rcSwitch.resetAvailable();
+    forceRxMode();
+  }
+
+  void forceRxMode()
+  {
+    rcSwitch.enableReceive(rxPin);
+    ELECHOUSE_cc1101.SetRx();
+    Serial.println("Forced RX mode (CC1101 and RCSwitch)");
   }
 
   void setRxPin(int pin) { rxPin = pin; }
