@@ -4,7 +4,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: 'Reverb',
     short_name: 'Reverb',
-    description: 'A companion app to the Reverb ESP32 firmware',
+    description: 'A web application for recording and replaying sub-GHz signals',
     start_url: '/',
     display: 'standalone',
     background_color: '#ffffff',
