@@ -35,6 +35,20 @@ This project requires the following hardware components:
 
 ![Hardware Diagram](assets/hardware_diagram.svg)
 
+## App
+
+| Main Screen | Signal History Modal |
+|-------------|----------------------|
+| ![Main screen](assets/Screenshot_20250814_170226_Chrome.jpg) | ![Signal History Modal](assets/Screenshot_20250814_170726_Chrome.jpg) |
+
+## Quickstart
+
+1. Navigate to [reverb.yasir.com.au](https://reverb.yasir.com.au) on a mobile or bluetooth-enabled device
+
+2. **(Optional)** Add the app to your device's home screen for easy access (see [PWA Installation](#pwa-installation) below)
+
+3. 
+
 ## Getting Started
 
 ### Prerequisites
@@ -85,12 +99,6 @@ On your bluetooth-enabled device:
 ### PWA Installation
 
 - On mobile, open the app in Chrome or Safari and use "Add to Home Screen" to install as a PWA.
-
-## App
-
-| Main Screen | Signal History Modal |
-|-------------|----------------------|
-| ![Main screen](assets/Screenshot_20250814_170226_Chrome.jpg) | ![Signal History Modal](assets/Screenshot_20250814_170726_Chrome.jpg) |
 
 ## License
 
