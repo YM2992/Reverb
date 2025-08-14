@@ -8,6 +8,7 @@ import FooterBar from "./FooterBar";
 import SignalList, { Signal } from "./SignalList";
 import SignalReplay from "./SignalReplay";
 import Transmit from "./Transmit";
+import SignalHistoryModal from "./SignalHistoryModal";
 
 function BleWebAppUI({
     state,
@@ -66,6 +67,8 @@ const BleWebApp: React.FC = () => {
 
     // Load signals from localStorage on mount
     const [signals, setSignals] = useState<Signal[]>(() => SignalStorage.loadSignals());
+    const [history, setHistory] = useState<Signal[]>(() => SignalStorage.loadHistory());
+    const [showHistory, setShowHistory] = useState(false);
 
     // Update signals when new BLE data is received
     useEffect(() => {
@@ -81,34 +84,26 @@ const BleWebApp: React.FC = () => {
         const frequency = parsed.freq || parsed.frequency;
         const rssi = parsed.rssi;
         if (data === undefined || frequency === undefined || rssi === undefined) return;
+        const newSignal: Signal = {
+            id: Math.random().toString(36).slice(2),
+            frequency: Number(frequency),
+            data: String(data),
+            rssi: rssi,
+            timestamp: Date.now(),
+        };
+        // Append to history
+        SignalStorage.appendToHistory(newSignal);
+        setHistory(SignalStorage.loadHistory());
+        // Deduplicate for display: only latest per data (and frequency)
         setSignals(prevSignals => {
-            // Find by exact data and frequency
-            const idx = prevSignals.findIndex(s => s.data === String(data) && s.frequency === Number(frequency));
-            let updated;
-            if (idx !== -1) {
-                // Update RSSI and timestamp
-                updated = [...prevSignals];
-                updated[idx] = {
-                    ...updated[idx],
-                    rssi: rssi,
-                    timestamp: Date.now(),
-                };
-            } else {
-                // Add new row
-                updated = [
-                    ...prevSignals,
-                    {
-                        id: Math.random().toString(36).slice(2),
-                        frequency: Number(frequency),
-                        data: String(data),
-                        rssi: rssi,
-                        timestamp: Date.now(),
-                    }
-                ];
+            const map = new Map<string, Signal>();
+            // Add all previous, but overwrite with new
+            for (const s of [...prevSignals, newSignal]) {
+                map.set(`${s.data}_${s.frequency}`, s);
             }
-            // Save to localStorage
-            SignalStorage.saveSignals(updated);
-            return updated;
+            const deduped = Array.from(map.values());
+            SignalStorage.saveSignals(deduped);
+            return deduped;
         });
     }, [state.lastValueReceived]);
 
@@ -121,7 +116,16 @@ const BleWebApp: React.FC = () => {
     const handleClearSignals = () => {
         if (window.confirm("Clear all detected signals?")) {
             SignalStorage.clearSignals();
+            SignalStorage.clearHistory();
             setSignals([]);
+            setHistory([]);
+        }
+    };
+    // Signal history modal as a component
+    const handleClearHistory = () => {
+        if (window.confirm("Clear all signal history?")) {
+            SignalStorage.clearHistory();
+            setHistory([]);
         }
     };
 
@@ -193,9 +197,16 @@ const BleWebApp: React.FC = () => {
             />
             <SignalList signals={signals} onRowClick={handleSignalRowClick} />
             <div style={{ display: 'flex', gap: 12, margin: '8px 0 0 0', justifyContent: 'flex-end' }}>
+                <button onClick={()=>setShowHistory(true)} style={{ padding: '6px 18px', borderRadius: 6, border: 'none', background: '#232323', color: '#fff', fontWeight: 600, cursor: 'pointer' }}>View History</button>
                 <button onClick={handleExportSignals} style={{ padding: '6px 18px', borderRadius: 6, border: 'none', background: '#007cf0', color: '#fff', fontWeight: 600, cursor: 'pointer' }}>Export</button>
                 <button onClick={handleClearSignals} style={{ padding: '6px 18px', borderRadius: 6, border: 'none', background: '#f0004c', color: '#fff', fontWeight: 600, cursor: 'pointer' }}>Clear</button>
             </div>
+            <SignalHistoryModal
+                isOpen={showHistory}
+                onClose={() => setShowHistory(false)}
+                history={history}
+                onClear={handleClearHistory}
+            />
             <Transmit
                 onTransmit={handleTransmitOnce}
                 onStart={handleStartTransmit}

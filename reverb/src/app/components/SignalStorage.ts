@@ -1,12 +1,42 @@
+
+
 import { Signal } from "./SignalList";
 
 const STORAGE_KEY = "reverb_signals";
 
 export class SignalStorage {
+    private static HISTORY_KEY = "reverb_signals_history";
+
+    static appendToHistory(signal: Signal): void {
+        try {
+            const data = localStorage.getItem(SignalStorage.HISTORY_KEY);
+            let arr: Signal[] = [];
+            if (data) {
+                arr = JSON.parse(data);
+                if (!Array.isArray(arr)) arr = [];
+            }
+            arr.push(signal);
+            localStorage.setItem(SignalStorage.HISTORY_KEY, JSON.stringify(arr));
+    } catch {}
+    }
+
+    static loadHistory(): Signal[] {
+        try {
+            const data = localStorage.getItem(SignalStorage.HISTORY_KEY);
+            if (!data) return [];
+            const arr = JSON.parse(data);
+            if (Array.isArray(arr)) return arr;
+            return [];
+    } catch { return []; }
+    }
+
+    static clearHistory(): void {
+    try { localStorage.removeItem(SignalStorage.HISTORY_KEY); } catch {}
+    }
     static saveSignals(signals: Signal[]): void {
         try {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(signals));
-        } catch (e) {
+    } catch {
             // Handle quota or serialization errors
         }
     }
@@ -21,7 +51,7 @@ export class SignalStorage {
                 return parsed;
             }
             return [];
-        } catch (e) {
+    } catch {
             return [];
         }
     }
@@ -29,6 +59,6 @@ export class SignalStorage {
     static clearSignals(): void {
         try {
             localStorage.removeItem(STORAGE_KEY);
-        } catch (e) { }
+    } catch { }
     }
 }
