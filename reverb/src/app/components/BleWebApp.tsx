@@ -239,7 +239,15 @@ const BleWebApp: React.FC = () => {
     }, [manager]);
 
     return (
-        <div style={{ padding: '20px', marginBottom: '80px', position: 'relative' }}>
+        <div
+            style={{
+                padding: '20px',
+                marginBottom: '80px',
+                position: 'relative',
+                marginTop: bleDisconnected ? 60 : undefined,
+                transition: 'margin-top 0.2s',
+            }}
+        >
             <DisconnectedBanner show={bleDisconnected} />
             <BleWebAppUI
                 state={state}
