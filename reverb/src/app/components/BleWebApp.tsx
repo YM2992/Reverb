@@ -146,29 +146,36 @@ const BleWebApp: React.FC = () => {
 
 
     // --- TX Protocol Implementation ---
+
+    // --- TX Protocol Implementation with timeout and repeat rate ---
+    const [txTimeout, setTxTimeout] = useState("5000");
+    const [txRepeat, setTxRepeat] = useState("100");
+
     const handleTransmitOnce = (value: string) => {
         const num = Number(value);
         if (!isNaN(num)) {
-            // TX,1,[data]
-            manager.writeStringCommandOnCharacteristic(`TX,1,${num}`, setState);
+            // TX,1,0,0,[data]
+            manager.writeStringCommandOnCharacteristic(`TX,1,0,0,${num}`, setState);
         } else {
             window.alert("Please enter a valid number to transmit.");
         }
     };
 
-    const handleStartTransmit = (value: string) => {
+    const handleStartTransmit = (value: string, timeout: string, repeat: string) => {
         const num = Number(value);
-        if (isNaN(num)) {
-            window.alert("Please enter a valid number to transmit.");
+        const t = Number(timeout);
+        const r = Number(repeat);
+        if (isNaN(num) || isNaN(t) || isNaN(r)) {
+            window.alert("Please enter valid numbers for value, timeout, and repeat rate.");
             return;
         }
-        // Send TX,2,[data] to start continual transmission
-        manager.writeStringCommandOnCharacteristic(`TX,2,${num}`, setState);
+        // Send TX,2,timeout,repeat_rate,data to start continual transmission
+        manager.writeStringCommandOnCharacteristic(`TX,2,${t},${r},${num}`, setState);
     };
 
     const handleStopTransmit = () => {
-        // Send TX,0,0 to stop continual transmission
-        manager.writeStringCommandOnCharacteristic(`TX,0,0`, setState);
+        // Send TX,0,0,0,0 to stop continual transmission
+        manager.writeStringCommandOnCharacteristic(`TX,0,0,0,0`, setState);
     };
 
     // Handler for clicking a signal row to auto-fill transmit value

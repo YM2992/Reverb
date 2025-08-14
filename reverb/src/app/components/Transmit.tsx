@@ -2,7 +2,7 @@ import React, { useState, useRef } from "react";
 
 interface TransmitProps {
     onTransmit: (value: string) => void;
-    onStart: (value: string) => void;
+    onStart: (value: string, timeout: string, repeat: string) => void;
     onStop: () => void;
     value?: string;
     setValue?: (v: string) => void;
@@ -14,7 +14,10 @@ const Transmit: React.FC<TransmitProps> = ({ onTransmit, onStart, onStop, value:
     const value = propValue !== undefined ? propValue : internalValue;
     const setValue = propSetValue !== undefined ? propSetValue : setInternalValue;
     const [isTransmitting, setIsTransmitting] = useState(false);
-    const intervalRef = useRef<NodeJS.Timeout | null>(null);
+    const [timeout, setTimeoutValue] = useState("5000");
+    const [repeat, setRepeat] = useState("100");
+    const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+    const timeoutTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const handleTransmit = () => {
         if (value.trim() !== "" && bleConnected) {
@@ -30,13 +33,20 @@ const Transmit: React.FC<TransmitProps> = ({ onTransmit, onStart, onStop, value:
         if (isTransmitting) {
             setIsTransmitting(false);
             if (intervalRef.current) clearInterval(intervalRef.current);
+            if (timeoutTimerRef.current) clearTimeout(timeoutTimerRef.current);
             onStop();
         } else if (bleConnected && value.trim() !== "") {
             setIsTransmitting(true);
-            onStart(value);
-            intervalRef.current = setInterval(() => {
-                onTransmit(value);
-            }, 1000);
+            onStart(value, timeout, repeat);
+            // Set a timer to auto-stop after timeout ms
+            if (timeoutTimerRef.current) clearTimeout(timeoutTimerRef.current);
+            const t = parseInt(timeout, 10);
+            if (!isNaN(t) && t > 0) {
+                timeoutTimerRef.current = setTimeout(() => {
+                    setIsTransmitting(false);
+                    onStop();
+                }, t);
+            }
         }
     };
 
@@ -45,10 +55,18 @@ const Transmit: React.FC<TransmitProps> = ({ onTransmit, onStart, onStop, value:
         if (!bleConnected && isTransmitting) {
             setIsTransmitting(false);
             if (intervalRef.current) clearInterval(intervalRef.current);
+            if (timeoutTimerRef.current) clearTimeout(timeoutTimerRef.current);
             onStop();
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [bleConnected]);
+
+    // Clean up timer on unmount
+    React.useEffect(() => {
+        return () => {
+            if (timeoutTimerRef.current) clearTimeout(timeoutTimerRef.current);
+        };
+    }, []);
 
     return (
         <div
@@ -68,7 +86,39 @@ const Transmit: React.FC<TransmitProps> = ({ onTransmit, onStart, onStop, value:
                 onChange={e => setValue(e.target.value)}
                 placeholder="Value"
                 style={{
-                    flex: "1 1 230px",
+                    flex: "1 1 120px",
+                    minWidth: 0,
+                    padding: "10px 12px",
+                    borderRadius: 6,
+                    border: "1px solid #ccc",
+                    fontSize: "1rem",
+                }}
+            />
+            <input
+                type="number"
+                value={timeout}
+                onChange={e => setTimeoutValue(e.target.value)}
+                placeholder="Timeout (ms)"
+                min={1}
+                max={60000}
+                style={{
+                    flex: "0 1 110px",
+                    minWidth: 0,
+                    padding: "10px 12px",
+                    borderRadius: 6,
+                    border: "1px solid #ccc",
+                    fontSize: "1rem",
+                }}
+            />
+            <input
+                type="number"
+                value={repeat}
+                onChange={e => setRepeat(e.target.value)}
+                placeholder="Repeat (ms)"
+                min={1}
+                max={10000}
+                style={{
+                    flex: "0 1 110px",
                     minWidth: 0,
                     padding: "10px 12px",
                     borderRadius: 6,
