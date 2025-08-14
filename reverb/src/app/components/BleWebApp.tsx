@@ -107,9 +107,19 @@ const BleWebApp: React.FC = () => {
         });
     }, [state.lastValueReceived]);
 
-    // Handler for replaying signals (replace with real logic as needed)
-    const handleReplay = (selectedSignals: Signal[]) => {
-        alert(`Replaying ${selectedSignals.length} signal(s):\n` + selectedSignals.map(s => `${s.frequency} MHz, ${s.data}, RSSI: ${s.rssi}`).join('\n'));
+    // Handler for replaying signals
+    const handleReplay = async (selectedSignals: Signal[]) => {
+        if (!selectedSignals.length) return;
+        // Replay each signal with a small delay (e.g., 300ms)
+        for (const signal of selectedSignals) {
+            // Send as TX,1,0,0,[data]
+            await manager.writeStringCommandOnCharacteristic(
+                `TX,1,0,0,${signal.data}`,
+                setState
+            );
+            // Wait 300ms between signals
+            await new Promise(res => setTimeout(res, 300));
+        }
     };
 
     // Clear signals handler
