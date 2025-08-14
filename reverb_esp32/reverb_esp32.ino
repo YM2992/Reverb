@@ -43,7 +43,10 @@ unsigned long continualTxValue = 0;
 unsigned int continualTxBitLength = 24;
 unsigned long continualTxStartMillis = 0;
 bool continualTxActive = false;
-const unsigned long CONTINUAL_TX_TIMEOUT = 5000;
+const unsigned long DEFAULT_CONTINUAL_TX_TIMEOUT = 5000;
+const unsigned long DEFAULT_REPEAT_TX_RATE = 100;
+unsigned long continualTxTimeout = DEFAULT_CONTINUAL_TX_TIMEOUT;
+unsigned long continualTxRepeatRate = DEFAULT_REPEAT_TX_RATE;
 
 RCSwitch rcSwitch = RCSwitch();
 
@@ -159,19 +162,32 @@ private:
 // Create a global instance for CC1101 and RCSwitch management
 CC1101RCSwitchManager cc1101Manager(cc1101RxPin, cc1101TxPin);
 
-bool parseTxMessage(const String &msg, int &txMode, unsigned long &data)
+// Format: "TX,[0/1/2],[timeout],[repeat_rate],[data]"
+// All params after mode are optional, but for mode 2, timeout and repeat_rate are used if present
+bool parseTxMessage(const String &msg, int &txMode, unsigned long &timeout, unsigned long &repeatRate, unsigned long &data)
 {
-  // Format: "TX,[0/1/2],[data]"
   if (!msg.startsWith("TX,"))
     return false;
   int firstComma = msg.indexOf(',', 3);
   if (firstComma == -1)
     return false;
-  String modeStr = msg.substring(3, firstComma);
   int secondComma = msg.indexOf(',', firstComma + 1);
-  String dataStr = (secondComma == -1) ? msg.substring(firstComma + 1) : msg.substring(firstComma + 1, secondComma);
+  int thirdComma = (secondComma != -1) ? msg.indexOf(',', secondComma + 1) : -1;
+  int fourthComma = (thirdComma != -1) ? msg.indexOf(',', thirdComma + 1) : -1;
+  String modeStr = msg.substring(3, firstComma);
+  String timeoutStr = (secondComma == -1) ? "" : msg.substring(firstComma + 1, secondComma);
+  String repeatStr = (thirdComma == -1 || secondComma == -1) ? "" : msg.substring(secondComma + 1, thirdComma);
+  String dataStr;
+  if (fourthComma != -1)
+    dataStr = msg.substring(thirdComma + 1, fourthComma);
+  else if (thirdComma != -1)
+    dataStr = msg.substring(thirdComma + 1);
+  else
+    dataStr = "";
   txMode = modeStr.toInt();
-  data = dataStr.toInt();
+  timeout = timeoutStr.length() > 0 ? timeoutStr.toInt() : 0;
+  repeatRate = repeatStr.length() > 0 ? repeatStr.toInt() : 0;
+  data = dataStr.length() > 0 ? dataStr.toInt() : 0;
   return true;
 }
 
@@ -198,14 +214,20 @@ class MyCharacteristicCallbacks : public BLECharacteristicCallbacks
       if (value.length() > 0)
       {
         int txMode = -1;
+        unsigned long txTimeout = 0;
+        unsigned long txRepeat = 0;
         unsigned long txData = 0;
-        if (parseTxMessage(value, txMode, txData))
+        if (parseTxMessage(value, txMode, txTimeout, txRepeat, txData))
         {
           Serial.print("Parsed TX message: mode=");
           Serial.print(txMode);
+          Serial.print(", timeout=");
+          Serial.print(txTimeout);
+          Serial.print(", repeat_rate=");
+          Serial.print(txRepeat);
           Serial.print(", data=");
           Serial.println(txData);
-          handleTxCommand(txMode, txData);
+          handleTxCommand(txMode, txTimeout, txRepeat, txData);
         }
         else
         {
@@ -247,7 +269,7 @@ class MyCharacteristicCallbacks : public BLECharacteristicCallbacks
   }
 };
 
-void handleTxCommand(int txMode, unsigned long data)
+void handleTxCommand(int txMode, unsigned long txTimeout, unsigned long txRepeat, unsigned long data)
 {
   switch (txMode)
   {
@@ -273,9 +295,14 @@ void handleTxCommand(int txMode, unsigned long data)
     continualTxActive = true;
     continualTxValue = data;
     continualTxBitLength = 24;
+    continualTxTimeout = (txTimeout > 0 && txTimeout < 60000) ? txTimeout : DEFAULT_CONTINUAL_TX_TIMEOUT;
+    continualTxRepeatRate = (txRepeat > 0 && txRepeat < 10000) ? txRepeat : DEFAULT_REPEAT_TX_RATE;
     continualTxStartMillis = millis();
     currentMode = MODE_TX;
-    Serial.println("CONTINUAL TX STARTED");
+    Serial.print("CONTINUAL TX STARTED, timeout: ");
+    Serial.print(continualTxTimeout);
+    Serial.print(", repeat rate: ");
+    Serial.println(continualTxRepeatRate);
     break;
   default:
     Serial.println("Unknown TX mode");
@@ -352,7 +379,7 @@ void loop()
     if (continualTxActive)
     {
       // Continual transmission mode
-      if (millis() - continualTxStartMillis > CONTINUAL_TX_TIMEOUT)
+      if (millis() - continualTxStartMillis > continualTxTimeout)
       {
         continualTxActive = false;
         continualTxValue = 0;
@@ -362,7 +389,7 @@ void loop()
       else
       {
         cc1101Manager.sendSignal(continualTxValue, continualTxBitLength);
-        delay(100); // adjust as needed for repeat rate
+        delay(continualTxRepeatRate);
       }
     }
     else
