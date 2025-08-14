@@ -42,7 +42,7 @@ export default function SignalReplay({ signals, onReplay }: SignalReplayProps) {
         </label>
         <button
           onClick={() => onReplay(filteredSignals)}
-          className="bg-gradient-to-r from-blue-500 to-cyan-400 text-white border-none rounded-md py-3 font-semibold cursor-pointer text-lg w-full mt-2"
+          className="bg-blue-500 text-white border-none rounded-md py-3 font-semibold cursor-pointer text-lg w-full mt-2"
         >
           Replay
         </button>

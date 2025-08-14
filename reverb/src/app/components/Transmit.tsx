@@ -118,7 +118,7 @@ const Transmit: React.FC<TransmitProps> = ({ onTransmit, onStart, onStop, value:
                 <button
                     onClick={handleTransmit}
                     disabled={value.trim() === "" || !bleConnected}
-                    className={`flex-1 min-w-0 py-2 rounded-md border-none text-white font-semibold text-base ${value.trim() === "" || !bleConnected ? 'bg-gray-400 cursor-not-allowed opacity-70' : 'bg-gradient-to-r from-blue-500 to-cyan-400 cursor-pointer'}`}
+                    className={`flex-1 min-w-0 py-2 rounded-md border-none text-white font-semibold text-base ${value.trim() === "" || !bleConnected ? 'bg-gray-400 cursor-not-allowed opacity-70' : 'bg-blue-500 cursor-pointer'}`}
                 >
                     Transmit Once
                 </button>
