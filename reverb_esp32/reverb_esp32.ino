@@ -115,12 +115,20 @@ public:
     if (txPin == -1)
     {
       Serial.println("TX pin not set, cannot send signal.");
+      currentMode = MODE_RX;
+      lastTxValue = 0;
+      lastTxBitLength = 0;
+      Serial.println("Switched to RX mode");
       return;
     }
 
     if (!rcSwitch.available())
     {
       Serial.println("RCSwitch not available, cannot send signal.");
+      currentMode = MODE_RX;
+      lastTxValue = 0;
+      lastTxBitLength = 0;
+      Serial.println("Switched to RX mode");
       return;
     }
 
@@ -141,6 +149,9 @@ private:
   int rxPin;
   int txPin = -1;
 };
+
+// Create a global instance for CC1101 and RCSwitch management
+CC1101RCSwitchManager cc1101Manager(cc1101RxPin, cc1101TxPin);
 
 class MyServerCallbacks : public BLEServerCallbacks
 {
@@ -181,6 +192,8 @@ class MyCharacteristicCallbacks : public BLECharacteristicCallbacks
         // Switch to TX mode and record time
         currentMode = MODE_TX;
         lastTxReceivedMillis = millis();
+        cc1101Manager.sendSignal(lastTxValue, lastTxBitLength);
+        lastTxValue = 0;
       }
     }
     else if (pChar->getUUID().toString() == MODE_CHARACTERISTIC_UUID)
@@ -198,9 +211,6 @@ class MyCharacteristicCallbacks : public BLECharacteristicCallbacks
     }
   }
 };
-
-// Create a global instance for CC1101 and RCSwitch management
-CC1101RCSwitchManager cc1101Manager(cc1101RxPin, cc1101TxPin);
 
 void setup()
 {
@@ -269,12 +279,12 @@ void loop()
   if (currentMode == MODE_TX)
   {
     // TX mode: transmit the last value received from BLE
-    if (lastTxValue != 0)
-    {
-      cc1101Manager.sendSignal(lastTxValue, lastTxBitLength);
-      delay(500);      // avoid spamming TX, adjust as needed
-      lastTxValue = 0; // Only send once per value
-    }
+    // if (lastTxValue != 0)
+    // {
+    //   cc1101Manager.sendSignal(lastTxValue, lastTxBitLength);
+    //   delay(500);      // avoid spamming TX, adjust as needed
+    //   lastTxValue = 0; // Only send once per value
+    // }
     // If no new TX value for 2s, switch back to RX
     if (now - lastTxReceivedMillis > TX_RX_DEBOUNCE)
     {
