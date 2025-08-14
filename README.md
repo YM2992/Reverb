@@ -1,5 +1,5 @@
 <p align="left">
-   <img src="reverb/public/reverb_icon.png" alt="Reverb Icon" width="48" style="vertical-align:middle; margin-right: 12px;" />
+   <img src="reverb/public/reverb_icon.png" alt="Reverb Icon" width="90" style="vertical-align:middle; margin-right: 12px;" />
 </p>
 
 # Reverb
@@ -88,13 +88,9 @@ On your bluetooth-enabled device:
 
 ## App
 
-### Main Screen
-
-![Main screen](assets/Screenshot_20250814_170226_Chrome.jpg)
-
-### Signal History Screen
-
-![Signal History Screen](assets/Screenshot_20250814_170726_Chrome.jpg)
+| Main Screen | Signal History Modal |
+|-------------|----------------------|
+| ![Main screen](assets/Screenshot_20250814_170226_Chrome.jpg) | ![Signal History Modal](assets/Screenshot_20250814_170726_Chrome.jpg) |
 
 ## License
 
