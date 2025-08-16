@@ -62,6 +62,17 @@ const BleWebApp: React.FC = () => {
     const [history, setHistory] = useState<Signal[]>(() => SignalStorage.loadHistory());
     const [showHistory, setShowHistory] = useState(false);
 
+    // Request geolocation access on first app load
+    useEffect(() => {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                () => { },
+                () => { },
+                { enableHighAccuracy: true, timeout: 3000, maximumAge: 0 }
+            );
+        }
+    }, []);
+
     // Update signals when new BLE data is received
     useEffect(() => {
         if (!state.lastValueReceived || state.lastValueReceived === '-') return;
@@ -84,27 +95,69 @@ const BleWebApp: React.FC = () => {
         const frequency = parsed.freq || parsed.frequency;
         const rssi = parsed.rssi;
         if (data === undefined || frequency === undefined || rssi === undefined) return;
-        const newSignal: Signal = {
-            id: Math.random().toString(36).slice(2),
+
+        // Immediately add signal without location
+        const id = Math.random().toString(36).slice(2);
+        const baseSignal: Signal = {
+            id,
             frequency: Number(frequency),
             data: String(data),
             rssi: rssi,
             timestamp: Date.now(),
         };
-        // Append to history
-        SignalStorage.appendToHistory(newSignal);
-        setHistory(SignalStorage.loadHistory());
-        // Deduplicate for display: only latest per data (and frequency)
+        // Deduplicate by data+frequency: update if exists, else add
         setSignals(prevSignals => {
             const map = new Map<string, Signal>();
-            // Add all previous, but overwrite with new
-            for (const s of [...prevSignals, newSignal]) {
+            for (const s of prevSignals) {
                 map.set(`${s.data}_${s.frequency}`, s);
             }
+            map.set(`${baseSignal.data}_${baseSignal.frequency}`, baseSignal);
             const deduped = Array.from(map.values());
             SignalStorage.saveSignals(deduped);
             return deduped;
         });
+        setHistory(prevHistory => {
+            const arr = [...prevHistory, baseSignal];
+            SignalStorage.appendToHistory(baseSignal);
+            return arr;
+        });
+
+        // Asynchronously update with location if available
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    setSignals(prevSignals => {
+                        const map = new Map<string, Signal>();
+                        for (const s of prevSignals) {
+                            if (s.id === id) {
+                                map.set(`${s.data}_${s.frequency}`, {
+                                    ...s,
+                                    latitude: pos.coords.latitude,
+                                    longitude: pos.coords.longitude,
+                                });
+                            } else {
+                                map.set(`${s.data}_${s.frequency}`, s);
+                            }
+                        }
+                        const deduped = Array.from(map.values());
+                        SignalStorage.saveSignals(deduped);
+                        return deduped;
+                    });
+                    setHistory(prevHistory => {
+                        // Update the matching signal in history
+                        const arr = prevHistory.map(s =>
+                            s.id === id
+                                ? { ...s, latitude: pos.coords.latitude, longitude: pos.coords.longitude }
+                                : s
+                        );
+                        SignalStorage.appendToHistory({ ...baseSignal, latitude: pos.coords.latitude, longitude: pos.coords.longitude });
+                        return arr;
+                    });
+                },
+                () => {},
+                { enableHighAccuracy: true, timeout: 3000, maximumAge: 0 }
+            );
+        }
     }, [state.lastValueReceived]);
 
     // Handler for replaying signals

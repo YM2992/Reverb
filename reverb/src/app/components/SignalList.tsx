@@ -6,6 +6,8 @@ export interface Signal {
   data: string;
   rssi: number;
   timestamp: number;
+  latitude?: number;
+  longitude?: number;
 }
 
 interface SignalListProps {
@@ -92,12 +94,14 @@ export default function SignalList({ signals, onRowClick }: SignalListProps) {
               <th className="bg-neutral-800 px-2 py-2 text-right font-bold border-b-2 border-gray-700 sticky top-0 z-10 w-24 min-w-[70px] max-w-[110px]">Frequency (MHz)</th>
               <th className="bg-neutral-800 px-3 py-2 text-left font-bold border-b-2 border-gray-700 sticky top-0 z-10">Data</th>
               <th className="bg-neutral-800 px-2 py-2 text-right font-bold border-b-2 border-gray-700 sticky top-0 z-10 w-24 min-w-[70px] max-w-[110px]">RSSI (dBm)</th>
+              <th className="bg-neutral-800 px-2 py-2 text-right font-bold border-b-2 border-gray-700 sticky top-0 z-10 w-32 min-w-[90px] max-w-[140px]">Latitude</th>
+              <th className="bg-neutral-800 px-2 py-2 text-right font-bold border-b-2 border-gray-700 sticky top-0 z-10 w-32 min-w-[90px] max-w-[140px]">Longitude</th>
             </tr>
           </thead>
           <tbody>
             {sortedSignals.length === 0 ? (
               <tr>
-                <td colSpan={4} className="text-center text-gray-400 font-mono py-3">No signals detected.</td>
+                <td colSpan={6} className="text-center text-gray-400 font-mono py-3">No signals detected.</td>
               </tr>
             ) : (
               sortedSignals.map((signal) => (
@@ -110,6 +114,16 @@ export default function SignalList({ signals, onRowClick }: SignalListProps) {
                   <td className="px-2 py-2 font-mono border-b border-gray-700 text-right w-24 min-w-[70px] max-w-[110px]">{signal.frequency}</td>
                   <td className="px-3 py-2 font-mono border-b border-gray-700">{signal.data}</td>
                   <td className="px-2 py-2 font-mono border-b border-gray-700 text-right w-24 min-w-[70px] max-w-[110px]">{signal.rssi}</td>
+                  <td className="px-2 py-2 font-mono border-b border-gray-700 text-right w-32 min-w-[90px] max-w-[140px]">
+                    {signal.latitude !== undefined
+                      ? signal.latitude.toFixed(6)
+                      : (now.getTime() - signal.timestamp < 10000 ? '⏳' : '-')}
+                  </td>
+                  <td className="px-2 py-2 font-mono border-b border-gray-700 text-right w-32 min-w-[90px] max-w-[140px]">
+                    {signal.longitude !== undefined
+                      ? signal.longitude.toFixed(6)
+                      : (now.getTime() - signal.timestamp < 10000 ? '⏳' : '-')}
+                  </td>
                 </tr>
               ))
             )}

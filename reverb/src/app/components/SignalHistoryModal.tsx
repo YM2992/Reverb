@@ -31,11 +31,13 @@ const SignalHistoryModal: React.FC<SignalHistoryModalProps> = ({ isOpen, onClose
                                 <th className="border-b border-gray-700 text-white px-2 py-2">Frequency (MHz)</th>
                                 <th className="border-b border-gray-700 text-white px-2 py-2">Data</th>
                                 <th className="border-b border-gray-700 text-white px-2 py-2">RSSI</th>
+                                <th className="border-b border-gray-700 text-white px-2 py-2">Latitude</th>
+                                <th className="border-b border-gray-700 text-white px-2 py-2">Longitude</th>
                             </tr>
                         </thead>
                         <tbody>
                             {history.length === 0 ? (
-                                <tr><td colSpan={4} className="text-center text-gray-400 py-4">No history</td></tr>
+                                <tr><td colSpan={6} className="text-center text-gray-400 py-4">No history</td></tr>
                             ) : (
                                 history.slice().reverse().map((signal, idx) => (
                                     <tr key={idx}>
@@ -43,6 +45,8 @@ const SignalHistoryModal: React.FC<SignalHistoryModalProps> = ({ isOpen, onClose
                                         <td className="px-2 py-2 border-b border-gray-800">{signal.frequency ?? "-"}</td>
                                         <td className="px-2 py-2 border-b border-gray-800">{signal.data}</td>
                                         <td className="px-2 py-2 border-b border-gray-800">{signal.rssi ?? "-"}</td>
+                                        <td className="px-2 py-2 border-b border-gray-800">{signal.latitude !== undefined ? signal.latitude.toFixed(6) : (Date.now() - signal.timestamp < 10000 ? '⏳' : '-')}</td>
+                                        <td className="px-2 py-2 border-b border-gray-800">{signal.longitude !== undefined ? signal.longitude.toFixed(6) : (Date.now() - signal.timestamp < 10000 ? '⏳' : '-')}</td>
                                     </tr>
                                 ))
                             )}
