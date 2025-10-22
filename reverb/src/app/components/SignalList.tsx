@@ -14,6 +14,7 @@ export interface Signal {
 interface SignalListProps {
   signals: Signal[];
   onRowClick?: (signal: Signal) => void;
+  onNicknameChange?: (data: string, nickname: string) => void;
 }
 
 const tableContainerStyle: React.CSSProperties = {
@@ -67,7 +68,7 @@ const tdDate: React.CSSProperties = {
   whiteSpace: 'nowrap',
 };
 
-export default function SignalList({ signals, onRowClick }: SignalListProps) {
+export default function SignalList({ signals, onRowClick, onNicknameChange }: SignalListProps) {
   // Sort signals by timestamp descending (newest first)
   const sortedSignals = [...signals].sort((a, b) => b.timestamp - a.timestamp);
 
@@ -113,7 +114,19 @@ export default function SignalList({ signals, onRowClick }: SignalListProps) {
                   className={onRowClick ? 'cursor-pointer bg-neutral-800 hover:bg-neutral-700 transition-colors' : ''}
                   onClick={onRowClick ? () => onRowClick(signal) : undefined}
                 >
-                  <td className="px-3 py-2 font-mono border-b border-gray-700">{signal.nickname ?? '-'}</td>
+                  <td className="px-3 py-2 font-mono border-b border-gray-700">
+                    <input
+                      type="text"
+                      value={signal.nickname ?? ""}
+                      placeholder="Enter nickname"
+                      className="bg-neutral-800 text-white px-2 py-1 rounded w-full"
+                      onChange={e => {
+                        if (typeof onNicknameChange === "function") {
+                          onNicknameChange(signal.data, e.target.value);
+                        }
+                      }}
+                    />
+                  </td>
                   <td className="px-3 py-2 font-mono border-b border-gray-700 text-sky-200 text-sm whitespace-nowrap">{new Date(signal.timestamp).toLocaleString()}</td>
                   <td className="px-2 py-2 font-mono border-b border-gray-700 text-right w-24 min-w-[70px] max-w-[110px]">{signal.frequency}</td>
                   <td className="px-3 py-2 font-mono border-b border-gray-700">{signal.data}</td>
