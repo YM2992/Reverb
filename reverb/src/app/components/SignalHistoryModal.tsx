@@ -6,9 +6,10 @@ interface SignalHistoryModalProps {
     onClose: () => void;
     history: Signal[];
     onClear: () => void;
+    onNicknameChange?: (id: string, nickname: string) => void;
 }
 
-const SignalHistoryModal: React.FC<SignalHistoryModalProps> = ({ isOpen, onClose, history, onClear }) => {
+const SignalHistoryModal: React.FC<SignalHistoryModalProps> = ({ isOpen, onClose, history, onClear, onNicknameChange }) => {
     if (!isOpen) return null;
     return (
         <div
@@ -27,6 +28,7 @@ const SignalHistoryModal: React.FC<SignalHistoryModalProps> = ({ isOpen, onClose
                     <table className="w-full border-collapse bg-transparent text-white font-mono text-sm">
                         <thead>
                             <tr>
+                                <th className="border-b border-gray-700 text-white px-2 py-2">Nickname</th>
                                 <th className="border-b border-gray-700 text-white px-2 py-2">Time</th>
                                 <th className="border-b border-gray-700 text-white px-2 py-2">Frequency (MHz)</th>
                                 <th className="border-b border-gray-700 text-white px-2 py-2">Data</th>
@@ -37,10 +39,23 @@ const SignalHistoryModal: React.FC<SignalHistoryModalProps> = ({ isOpen, onClose
                         </thead>
                         <tbody>
                             {history.length === 0 ? (
-                                <tr><td colSpan={6} className="text-center text-gray-400 py-4">No history</td></tr>
+                                <tr><td colSpan={7} className="text-center text-gray-400 py-4">No history</td></tr>
                             ) : (
                                 history.slice().reverse().map((signal, idx) => (
                                     <tr key={idx}>
+                                        <td className="px-2 py-2 border-b border-gray-800">
+                                            <input
+                                                type="text"
+                                                value={signal.nickname ?? ""}
+                                                placeholder="Enter nickname"
+                                                className="bg-neutral-800 text-white px-2 py-1 rounded w-full"
+                                                onChange={e => {
+                                                    if (typeof signal.id === "string" && onNicknameChange) {
+                                                        onNicknameChange(signal.id, e.target.value);
+                                                    }
+                                                }}
+                                            />
+                                        </td>
                                         <td className="px-2 py-2 border-b border-gray-800">{signal.timestamp ? new Date(signal.timestamp).toLocaleString() : "-"}</td>
                                         <td className="px-2 py-2 border-b border-gray-800">{signal.frequency ?? "-"}</td>
                                         <td className="px-2 py-2 border-b border-gray-800">{signal.data}</td>
