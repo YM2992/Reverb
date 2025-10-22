@@ -24,22 +24,44 @@ function BleWebAppUI({
 }) {
     return (
         <div className="mx-auto max-w-2xl font-sans mb-6 px-4 w-full">
-            <h1 className="text-center mt-6 mb-4 text-white select-none font-black text-4xl leading-tight tracking-wide relative">
-                Reverb
-                <span className="block w-full h-2 mt-1 bg-none relative">
-                    <svg width="120" height="10" viewBox="0 0 120 10" className="block mx-auto">
-                        <polyline
-                            points="0,5 10,5 15,2 20,8 25,5 35,5 40,3 45,7 50,5 60,5 65,2 70,8 75,5 85,5 90,3 95,7 100,5 110,5 120,5"
-                            fill="none"
-                            stroke="#4fd1ff"
-                            strokeWidth="2"
-                            opacity="0.5"
-                        >
-                            <animate attributeName="opacity" values="0.5;1;0.5" dur="2s" repeatCount="indefinite" />
-                        </polyline>
+            <div className="relative mt-6 mb-4">
+                <h1 className="flex flex-col items-center text-white select-none font-black text-4xl leading-tight tracking-wide">
+                    <span>Reverb</span>
+                    <span className="block w-full h-2 mt-1 bg-none relative">
+                        <svg width="120" height="10" viewBox="0 0 120 10" className="block mx-auto">
+                            <polyline
+                                points="0,5 10,5 15,2 20,8 25,5 35,5 40,3 45,7 50,5 60,5 65,2 70,8 75,5 85,5 90,3 95,7 100,5 110,5 120,5"
+                                fill="none"
+                                stroke="#4fd1ff"
+                                strokeWidth="2"
+                                opacity="0.5"
+                            >
+                                <animate attributeName="opacity" values="0.5;1;0.5" dur="2s" repeatCount="indefinite" />
+                            </polyline>
+                        </svg>
+                    </span>
+                </h1>
+                <a
+                    href="https://github.com/YM2992/Reverb"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title="View source on GitHub"
+                    className="absolute right-0 top-1 flex items-center"
+                    style={{ height: "2.2rem" }}
+                >
+                    <svg
+                        width="32"
+                        height="32"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                        aria-hidden="true"
+                        className="hover:text-sky-400 transition-colors"
+                        style={{ display: "inline-block", verticalAlign: "middle" }}
+                    >
+                        <path d="M12 2C6.477 2 2 6.484 2 12.021c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.483 0-.237-.009-.868-.014-1.703-2.782.605-3.369-1.342-3.369-1.342-.454-1.155-1.11-1.463-1.11-1.463-.908-.62.069-.608.069-.608 1.004.07 1.532 1.032 1.532 1.032.892 1.53 2.341 1.088 2.91.832.091-.647.35-1.088.636-1.339-2.221-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.254-.446-1.274.098-2.656 0 0 .84-.27 2.75 1.025A9.564 9.564 0 0 1 12 6.844c.85.004 1.705.115 2.504.337 1.909-1.295 2.747-1.025 2.747-1.025.546 1.382.202 2.402.1 2.656.64.7 1.028 1.595 1.028 2.688 0 3.847-2.337 4.695-4.566 4.944.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.579.688.481C19.138 20.183 22 16.437 22 12.021 22 6.484 17.523 2 12 2z"/>
                     </svg>
-                </span>
-            </h1>
+                </a>
+            </div>
         </div>
     );
 }
