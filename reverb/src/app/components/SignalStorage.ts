@@ -36,7 +36,15 @@ export class SignalStorage {
     static saveSignals(signals: Signal[]): void {
         try {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(signals));
-    } catch {
+        } catch {
+            // Handle quota or serialization errors
+        }
+    }
+
+    static saveHistory(history: Signal[]): void {
+        try {
+            localStorage.setItem(SignalStorage.HISTORY_KEY, JSON.stringify(history));
+        } catch {
             // Handle quota or serialization errors
         }
     }

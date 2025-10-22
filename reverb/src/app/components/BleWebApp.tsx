@@ -291,6 +291,22 @@ const BleWebApp: React.FC = () => {
                     onClose={() => setShowHistory(false)}
                     history={history}
                     onClear={handleClearHistory}
+                    onNicknameChange={(id, nickname) => {
+                        setSignals(prevSignals => {
+                            const updated = prevSignals.map(s =>
+                                s.id === id ? { ...s, nickname } : s
+                            );
+                            SignalStorage.saveSignals(updated);
+                            return updated;
+                        });
+                        setHistory(prevHistory => {
+                            const updated = prevHistory.map(s =>
+                                s.id === id ? { ...s, nickname } : s
+                            );
+                            SignalStorage.saveHistory(updated);
+                            return updated;
+                        });
+                    }}
                 />
                 <Transmit
                     onTransmit={handleTransmitOnce}
