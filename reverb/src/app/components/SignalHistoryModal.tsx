@@ -46,6 +46,7 @@ const SignalHistoryModal: React.FC<SignalHistoryModalProps> = ({ isOpen, onClose
                                 <th className="border-b border-gray-700 text-white px-2 py-2">RSSI</th>
                                 <th className="border-b border-gray-700 text-white px-2 py-2">Latitude</th>
                                 <th className="border-b border-gray-700 text-white px-2 py-2">Longitude</th>
+                                <th className="border-b border-gray-700 text-white px-2 py-2 text-center">Map</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -78,6 +79,22 @@ const SignalHistoryModal: React.FC<SignalHistoryModalProps> = ({ isOpen, onClose
                                         <td className="px-2 py-2 border-b border-gray-800">{signal.rssi ?? "-"}</td>
                                         <td className="px-2 py-2 border-b border-gray-800">{signal.latitude !== undefined ? signal.latitude.toFixed(6) : (Date.now() - signal.timestamp < 10000 ? '⏳' : '-')}</td>
                                         <td className="px-2 py-2 border-b border-gray-800">{signal.longitude !== undefined ? signal.longitude.toFixed(6) : (Date.now() - signal.timestamp < 10000 ? '⏳' : '-')}</td>
+                                        <td className="px-2 py-2 border-b border-gray-800 text-center">
+                                            {(signal.latitude !== undefined && signal.longitude !== undefined) ? (
+                                                <a
+                                                    href={`https://maps.google.com/?q=${signal.latitude},${signal.longitude}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    title="View on map"
+                                                    style={{ color: "#38bdf8", textDecoration: "underline", fontWeight: 600 }}
+                                                    onClick={e => { e.stopPropagation(); }}
+                                                >
+                                                    Map
+                                                </a>
+                                            ) : (
+                                                <span style={{ color: "#888" }}>-</span>
+                                            )}
+                                        </td>
                                     </tr>
                                 ))
                             )}
