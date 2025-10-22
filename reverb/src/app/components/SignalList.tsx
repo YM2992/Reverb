@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useEffect, useState } from 'react';
 
 export interface Signal {
@@ -136,27 +138,27 @@ export default function SignalList({ signals, onRowClick, onNicknameChange }: Si
                       ? signal.latitude.toFixed(6)
                       : (now.getTime() - signal.timestamp < 10000 ? '⏳' : '-')}
                   </td>
-                <td className="px-2 py-2 font-mono border-b border-gray-700 text-right w-32 min-w-[90px] max-w-[140px]">
-                  {signal.longitude !== undefined
-                    ? signal.longitude.toFixed(6)
-                    : (now.getTime() - signal.timestamp < 10000 ? '⏳' : '-')}
-                </td>
-                <td className="px-2 py-2 border-b border-gray-700 text-center w-20 min-w-[70px] max-w-[90px]">
-                  {(signal.latitude !== undefined && signal.longitude !== undefined) ? (
-                    <a
-                      href={`https://maps.google.com/?q=${signal.latitude},${signal.longitude}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      title="View on map"
-                      style={{ color: "#38bdf8", textDecoration: "underline", fontWeight: 600 }}
-                      onClick={e => { e.stopPropagation(); }}
-                    >
-                      Map
-                    </a>
-                  ) : (
-                    <span style={{ color: "#888" }}>-</span>
-                  )}
-                </td>
+                  <td className="px-2 py-2 font-mono border-b border-gray-700 text-right w-32 min-w-[90px] max-w-[140px]">
+                    {signal.longitude !== undefined
+                      ? signal.longitude.toFixed(6)
+                      : (now.getTime() - signal.timestamp < 10000 ? '⏳' : '-')}
+                  </td>
+                  <td className="px-2 py-2 border-b border-gray-700 text-center w-20 min-w-[70px] max-w-[90px]">
+                    {(signal.latitude !== undefined && signal.longitude !== undefined) ? (
+                      <a
+                        href={`https://maps.google.com/?q=${signal.latitude},${signal.longitude}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        title="View on map"
+                        style={{ color: "#38bdf8", textDecoration: "underline", fontWeight: 600 }}
+                        onClick={e => { e.stopPropagation(); }}
+                      >
+                        Map
+                      </a>
+                    ) : (
+                      <span style={{ color: "#888" }}>-</span>
+                    )}
+                  </td>
                 </tr>
               ))
             )}
