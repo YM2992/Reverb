@@ -42,7 +42,11 @@ export default function SignalReplay({ signals, onReplay }: SignalReplayProps) {
         </label>
         <button
           onClick={() => onReplay(filteredSignals)}
-          className="bg-blue-500 text-white border-none rounded-md py-3 font-semibold cursor-pointer text-lg w-full mt-2"
+          className={`border-none rounded-md py-3 font-semibold text-lg w-full mt-2 ${(!start || !end)
+              ? "bg-gray-500 text-gray-300 cursor-not-allowed"
+              : "bg-blue-500 text-white cursor-pointer"
+            }`}
+          disabled={!start || !end}
         >
           Replay
         </button>
