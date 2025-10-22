@@ -154,7 +154,7 @@ const BleWebApp: React.FC = () => {
                         return arr;
                     });
                 },
-                () => {},
+                () => { },
                 { enableHighAccuracy: true, timeout: 3000, maximumAge: 0 }
             );
         }
@@ -285,16 +285,11 @@ const BleWebApp: React.FC = () => {
                     onRowClick={handleSignalRowClick}
                     onNicknameChange={(data, nickname) => {
                         // Update localStorage
-                        const signalsRaw = window.localStorage.getItem("reverb_signals");
-                        if (signalsRaw) {
-                            try {
-                                const signalsArr = JSON.parse(signalsRaw);
-                                const updated = signalsArr.map((s: Signal) =>
-                                    s.data === data ? { ...s, nickname } : s
-                                );
-                                SignalStorage.saveSignals(updated);
-                            } catch {}
-                        }
+                        const signalsArr = SignalStorage.loadSignals();
+                        const updated = signalsArr.map((s: Signal) =>
+                            s.data === data ? { ...s, nickname } : s
+                        );
+                        SignalStorage.saveSignals(updated);
                         // Update React state
                         setSignals(prevSignals =>
                             prevSignals.map(s =>
