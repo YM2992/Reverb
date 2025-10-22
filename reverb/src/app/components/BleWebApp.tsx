@@ -154,7 +154,7 @@ const BleWebApp: React.FC = () => {
                         return arr;
                     });
                 },
-                () => {},
+                () => { },
                 { enableHighAccuracy: true, timeout: 3000, maximumAge: 0 }
             );
         }
@@ -280,7 +280,24 @@ const BleWebApp: React.FC = () => {
                     onDisconnect={() => manager.disconnect(setState)}
                     onWrite={(val) => manager.writeOnCharacteristic(val, setState)}
                 />
-                <SignalList signals={signals} onRowClick={handleSignalRowClick} />
+                <SignalList
+                    signals={signals}
+                    onRowClick={handleSignalRowClick}
+                    onNicknameChange={(data, nickname) => {
+                        // Update localStorage
+                        const signalsArr = SignalStorage.loadSignals();
+                        const updated = signalsArr.map((s: Signal) =>
+                            s.data === data ? { ...s, nickname } : s
+                        );
+                        SignalStorage.saveSignals(updated);
+                        // Update React state
+                        setSignals(prevSignals =>
+                            prevSignals.map(s =>
+                                s.data === data ? { ...s, nickname } : s
+                            )
+                        );
+                    }}
+                />
                 <div className="flex gap-3 mt-2 justify-end">
                     <button onClick={() => setShowHistory(true)} className="px-4 py-1.5 rounded-md border-none bg-neutral-800 text-white font-semibold cursor-pointer">View History</button>
                     <button onClick={handleExportSignals} className="px-4 py-1.5 rounded-md border-none bg-blue-500 text-white font-semibold cursor-pointer">Export</button>
@@ -291,22 +308,6 @@ const BleWebApp: React.FC = () => {
                     onClose={() => setShowHistory(false)}
                     history={history}
                     onClear={handleClearHistory}
-                    onNicknameChange={(id, nickname) => {
-                        setSignals(prevSignals => {
-                            const updated = prevSignals.map(s =>
-                                s.id === id ? { ...s, nickname } : s
-                            );
-                            SignalStorage.saveSignals(updated);
-                            return updated;
-                        });
-                        setHistory(prevHistory => {
-                            const updated = prevHistory.map(s =>
-                                s.id === id ? { ...s, nickname } : s
-                            );
-                            SignalStorage.saveHistory(updated);
-                            return updated;
-                        });
-                    }}
                 />
                 <Transmit
                     onTransmit={handleTransmitOnce}
