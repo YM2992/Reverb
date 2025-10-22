@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Signal } from "./SignalList";
 
 interface SignalHistoryModalProps {
@@ -10,6 +10,17 @@ interface SignalHistoryModalProps {
 }
 
 const SignalHistoryModal: React.FC<SignalHistoryModalProps> = ({ isOpen, onClose, history, onClear, onNicknameChange }) => {
+    const [nicknameEdits, setNicknameEdits] = useState<{ [id: string]: string }>({});
+
+    React.useEffect(() => {
+        // Reset local state when history changes (e.g., modal opens)
+        const initial: { [id: string]: string } = {};
+        history.forEach(signal => {
+            initial[signal.id] = signal.nickname ?? "";
+        });
+        setNicknameEdits(initial);
+    }, [history, isOpen]);
+
     if (!isOpen) return null;
     return (
         <div
@@ -46,12 +57,17 @@ const SignalHistoryModal: React.FC<SignalHistoryModalProps> = ({ isOpen, onClose
                                         <td className="px-2 py-2 border-b border-gray-800">
                                             <input
                                                 type="text"
-                                                value={signal.nickname ?? ""}
+                                                value={nicknameEdits[signal.id] ?? ""}
                                                 placeholder="Enter nickname"
                                                 className="bg-neutral-800 text-white px-2 py-1 rounded w-full"
                                                 onChange={e => {
-                                                    if (typeof signal.id === "string" && onNicknameChange) {
-                                                        onNicknameChange(signal.id, e.target.value);
+                                                    const value = e.target.value;
+                                                    setNicknameEdits(edits => ({
+                                                        ...edits,
+                                                        [signal.id]: value
+                                                    }));
+                                                    if (onNicknameChange && typeof signal.id === "string") {
+                                                        onNicknameChange(signal.id, value);
                                                     }
                                                 }}
                                             />
