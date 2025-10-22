@@ -8,6 +8,7 @@ export interface Signal {
   timestamp: number;
   latitude?: number;
   longitude?: number;
+  nickname?: string;
 }
 
 interface SignalListProps {
@@ -90,6 +91,7 @@ export default function SignalList({ signals, onRowClick }: SignalListProps) {
         <table className="w-full border-collapse bg-transparent text-white">
           <thead>
             <tr>
+              <th className="bg-neutral-800 px-3 py-2 text-left font-bold border-b-2 border-gray-700 sticky top-0 z-10">Nickname</th>
               <th className="bg-neutral-800 px-3 py-2 text-left font-bold border-b-2 border-gray-700 sticky top-0 z-10">Timestamp</th>
               <th className="bg-neutral-800 px-2 py-2 text-right font-bold border-b-2 border-gray-700 sticky top-0 z-10 w-24 min-w-[70px] max-w-[110px]">Frequency (MHz)</th>
               <th className="bg-neutral-800 px-3 py-2 text-left font-bold border-b-2 border-gray-700 sticky top-0 z-10">Data</th>
@@ -101,7 +103,7 @@ export default function SignalList({ signals, onRowClick }: SignalListProps) {
           <tbody>
             {sortedSignals.length === 0 ? (
               <tr>
-                <td colSpan={6} className="text-center text-gray-400 font-mono py-3">No signals detected.</td>
+                <td colSpan={7} className="text-center text-gray-400 font-mono py-3">No signals detected.</td>
               </tr>
             ) : (
               sortedSignals.map((signal) => (
@@ -110,6 +112,7 @@ export default function SignalList({ signals, onRowClick }: SignalListProps) {
                   className={onRowClick ? 'cursor-pointer bg-neutral-800 hover:bg-neutral-700 transition-colors' : ''}
                   onClick={onRowClick ? () => onRowClick(signal) : undefined}
                 >
+                  <td className="px-3 py-2 font-mono border-b border-gray-700">{signal.nickname ?? '-'}</td>
                   <td className="px-3 py-2 font-mono border-b border-gray-700 text-sky-200 text-sm whitespace-nowrap">{new Date(signal.timestamp).toLocaleString()}</td>
                   <td className="px-2 py-2 font-mono border-b border-gray-700 text-right w-24 min-w-[70px] max-w-[110px]">{signal.frequency}</td>
                   <td className="px-3 py-2 font-mono border-b border-gray-700">{signal.data}</td>
