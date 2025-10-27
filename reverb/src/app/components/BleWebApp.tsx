@@ -124,15 +124,18 @@ const BleWebApp: React.FC = () => {
 
         // Immediately add signal without location
         const id = Math.random().toString(36).slice(2);
+        // Find nickname from existing signal with same data
+        const existingNickname = signals.find(s => s.data === String(data) && s.nickname);
         const baseSignal: Signal = {
             id,
             frequency: Number(frequency),
             data: String(data),
             rssi: rssi,
             timestamp: Date.now(),
+            nickname: existingNickname && existingNickname.nickname ? existingNickname.nickname : undefined,
         };
-        // Deduplicate by data+frequency: update if exists, else add
         setSignals(prevSignals => {
+            // Deduplicate by data+frequency: update if exists, else add
             const map = new Map<string, Signal>();
             for (const s of prevSignals) {
                 map.set(`${s.data}_${s.frequency}`, s);
